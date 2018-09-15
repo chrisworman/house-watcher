@@ -1,3 +1,3 @@
 # house-watcher
 
-Monorep for the House Watcher app.
+Monorepo for the House Watcher app.
