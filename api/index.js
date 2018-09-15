@@ -1,5 +1,6 @@
 const express = require('express');
 const bodyParser = require('body-parser');
+//const router = require('./app/routes/house.route.js');
 
 // create express app
 const app = express();
@@ -26,10 +27,12 @@ mongoose.connect(dbConfig.url, {
     process.exit();
 });
 
-// define a simple route
-app.get('/houses', (req, res) => {
-    res.json([{"id": "houseid"}]);
-});
+// app.get('/', (req, res) => {
+//     res.json({"version": "1.0.0"});
+// });
+
+//router(app);
+require('./app/routes/house.route.js')(app);
 
 // listen for requests
 app.listen(3000, () => {
