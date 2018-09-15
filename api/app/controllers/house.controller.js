@@ -66,19 +66,26 @@ exports.upsert = (req, res) => {
 
 // Retrieve and return all houses from the database.
 exports.findAll = (req, res) => {
-
+  House.find()
+    .then(houses => {
+        res.send(houses);
+    }).catch(err => {
+        res.status(500).send({
+            message: err.message || "Error retrieving houses."
+        });
+    });
 };
 
 // Find a single house with a houseId
 exports.findOneByExternalId = (req, res) => {
   House.findById(req.params.externalId)
       .then(house => {
-          if(!note) {
+          if(!house) {
               return res.status(404).send({
                   message: "House not found with id " + req.params.externalId
               });
           }
-          res.send(note);
+          res.send(house);
       }).catch(err => {
           if(err.kind === 'ObjectId') {
               return res.status(404).send({
@@ -86,7 +93,7 @@ exports.findOneByExternalId = (req, res) => {
               });
           }
           return res.status(500).send({
-              message: "Error retrieving note with id " + req.params.externalId
+              message: "Error retrieving house with id " + req.params.externalId
           });
       });
 };
