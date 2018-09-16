@@ -33,13 +33,17 @@ realtor.post(opts)
   });
 
 function sendRequest(property){
-  //put
-  //localhost:3000/houses
+
+  const propertyJson = JSON.stringify(property);
+
   var options = {
     host: 'localhost',
     port: 3000,
     path: '/houses',
-    method: 'PUT'
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    }
   };
 
   var req = http.request(options, function(res) {
@@ -55,9 +59,9 @@ function sendRequest(property){
     console.log('problem with request: ' + e.message);
   });
 
+  console.log(propertyJson);
   // write data to request body
-  req.write('data\n');
-  req.write('data\n');
+  req.write(propertyJson);
   req.end();
 
   console.log('--------Request sent---------');
