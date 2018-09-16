@@ -7,9 +7,9 @@ exports.upsert = (req, res) => {
 
   // Validate
   if(!req.body) {
-      return res.status(400).send({
-          message: "Empty body"
-      });
+    return res.status(400).send({
+        message: "Malformed HTTP body"
+    });
   }
 
   // Check for existing house
@@ -29,6 +29,7 @@ exports.upsert = (req, res) => {
         currentPrice: req.body.currentPrice,
         pictureUrl: req.body.pictureUrl,
         listingUrl: req.body.listingUrl,
+        status: "new",
         priceHistory: [],
       });
     } else {
@@ -38,6 +39,7 @@ exports.upsert = (req, res) => {
       house.currentPrice = req.body.currentPrice;
       house.pictureUrl = req.body.pictureUrl;
       house.listingUrl = req.body.listingUrl;
+      house.status = req.body.status ? req.body.status : house.status;
 
       // New price?
       if (house.priceHistory.length === 0 ||
@@ -56,13 +58,44 @@ exports.upsert = (req, res) => {
         res.send(data);
     }).catch(err => {
         res.status(500).send({
-            message: err.message || "Error creating house."
+            message: err.message || "Error creating house"
         });
     });
 
   });
 };
 
+exports.setStatus = (req, res) => {
+
+  console.log("Setting status of " + req.params.externalId);
+
+  House.findOne({ externalId: req.params.externalId }, function (err, house) {
+
+    if (err) {
+      return res.status(500).send({
+          message: "Server error: " + err.toString()
+      });
+    }
+
+    if (!house) {
+      return res.status(404).send({
+          message: "House " + externalId + " not found: " + err.toString()
+      });
+    }
+
+    house.status = req.params.status;
+    house.save()
+    .then(data => {
+        res.send(data);
+    }).catch(err => {
+        res.status(500).send({
+            message: err.message || "Error setting house status."
+        });
+    });
+
+  });
+
+};
 
 // Retrieve and return all houses from the database.
 exports.findAll = (req, res) => {
@@ -96,11 +129,6 @@ exports.findOneByExternalId = (req, res) => {
               message: "Error retrieving house with id " + req.params.externalId
           });
       });
-};
-
-// Update a house identified by the houseId in the request
-exports.update = (req, res) => {
-
 };
 
 // Delete a house with the specified houseId in the request

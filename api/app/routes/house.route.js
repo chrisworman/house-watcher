@@ -3,5 +3,6 @@ module.exports = (app) => {
     app.get('/houses', houses.findAll);
     app.get('/houses/:externalId', houses.findOneByExternalId);
     app.put('/houses', houses.upsert);
+    app.put('/houses/:externalId/status/:status', houses.setStatus);
     app.delete('/houses/:houseId', houses.delete);
 }
