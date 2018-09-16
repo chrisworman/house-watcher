@@ -26,6 +26,32 @@
         background-color: #eee;
       }
 
+      .house-rank,
+      .house-rank-input {
+        background-color: #337ab7;
+        height: 35px;
+        width: 35px;
+        border-radius: 50%;
+        padding : 0;
+        margin : 0;
+        outline: 0;
+        text-align: center;
+        line-height: 35px;
+        font-size: 18px;
+        color: #fff;
+        float: left;
+        position: relative;
+        top: -10px;
+        left: -10px;
+        border: solid 1px #444;
+        box-shadow: 2px 3px 10px 1px #333;
+        cursor: pointer;
+      }
+
+      .house-rank-input {
+        display : none;
+      }
+
       .house-image {
         display: block;
         width: 240px;
@@ -72,19 +98,29 @@
     <script id="housesTemplate" type="text/x-handlebars-template">
         {{#each this}}
           <div class="house">
+            <div class="house-rank">
+              {{rank}}
+            </div>
+            <input
+              type="text"
+              class="house-rank-input"
+              value="{{rank}}"
+              data-externalid="{{externalId}}"
+            />
             <a
               href="{{listingUrl}}"
               class="house-image"
               style="background-image: url('{{pictureUrl}}');"
               target="_blank"
-            />
+            ></a>
             <a
               href="https://www.google.ca/maps/place/{{address}}/"
               class="small house-address"
+              title="{{address}}"
               target="_blank"
             >
               <span class="glyphicon glyphicon-map-marker"></span>
-              {{address}}
+              {{shortAddress}}
             </a>
 
             <div class="pull-right">
@@ -121,13 +157,45 @@
             console.log(houses);
             if (houses) {
               addTrendCssClasses(houses);
-              addStatusFlags(houses)
+              addStatusFlags(houses);
+              addShortAddress(houses);
+              sortHouses(houses);
               var templateSource = document.getElementById("housesTemplate").innerHTML;
               var template = Handlebars.compile(templateSource);
               var housesHtml = template(houses);
               $('#houses').html(housesHtml);
+              bindEventHandlers();
             }
         });
+      }
+
+      function bindEventHandlers() {
+
+        $('.house-rank').click(function(event) {
+            var $rankDiv = $(event.target);
+            var $rankInput = $rankDiv.next('input');
+            $rankDiv.hide();
+            $rankInput.show();
+            $rankInput.focus();
+        });
+
+        $('.house-rank-input').keypress(function(event) {
+          if (event.keyCode == 13) {
+            var $rankInput = $(event.target);
+            var newRank = $rankInput.val();
+            var externalId = $rankInput.data('externalid');
+            console.log('newRank=' + newRank.toString() + ', externalId=' + externalId.toString())
+            $.ajax({
+              url: 'http://localhost:3000/houses/' + externalId.toString() + '/rank/' + newRank.toString(),
+              type: 'put',
+              success: function(){
+                refreshHouses();
+              }
+            });
+
+          }
+        });
+
       }
 
       function addTrendCssClasses(houses) {
@@ -145,11 +213,25 @@
         });
       }
 
+      function sortHouses(houses) {
+        houses.sort(function(h1, h2) {
+          var h1CompRank = h1.rank == 0 ? 99999 : h1.rank;
+          var h2CompRank = h2.rank == 0 ? 99999 : h2.rank;
+          return h1CompRank - h2CompRank;
+        });
+      }
+
       function addStatusFlags(houses) {
         houses.forEach(function(house) {
           house.isNew = house.status === 'new';
           house.isLiked = house.status === 'liked';
           house.isDisliked = house.status === 'disliked';
+        });
+      }
+
+      function addShortAddress(houses) {
+        houses.forEach(function(house) {
+          house.shortAddress = house.address.split(',')[0];
         });
       }
 
