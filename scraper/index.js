@@ -85,8 +85,8 @@ function mapResponseToModel(obj){
       externalId: obj.Results[i].MlsNumber,
       address: obj.Results[i].Property.Address.AddressText,
       currentPrice: obj.Results[i].Property.Price,
-      pictureUrl: 'https://www.realtor.ca/' + obj.Results[i].Property.Photo[0].HighResPath,  //add if statement
-      listingUrl: obj.Results[i].RelativeDetailsURL,
+      pictureUrl: obj.Results[i].Property.Photo[0].HighResPath,  //add if statement
+      listingUrl: 'https://www.realtor.ca/' + obj.Results[i].RelativeDetailsURL,
     });
   }
 
