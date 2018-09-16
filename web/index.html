@@ -9,16 +9,33 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
 
     <style type="text/css">
+
       body {
         font-family : Arial, Helvetica, sans-serif;
       }
+      
       .house {
         float: left;
         margin: 15px;
-        padding: 30px;
+        padding: 15px;
         border: solid 1px #ddd;
         border-radius: 5px;
       }
+
+      .house:hover {
+        background-color: #eee;
+      }
+
+      .house-image {
+        display: block;
+        width: 200px;
+        height: 200px;
+        background-repeat: no-repeat;
+        background-size: contain;
+        background-position: center center;
+        margin-bottom: 15px;
+      }
+
     </style>
 
   </head>
@@ -35,23 +52,55 @@
     <script id="housesTemplate" type="text/x-handlebars-template">
         {{#each this}}
           <div class="house">
-            <div>{{externalId}}</div>
-            <img src="{{pictureUrl}}" />
+            <a
+              href="{{listingUrl}}"
+              class="house-image"
+              style="background-image: url('{{pictureUrl}}');"
+              target="_blank"
+            />
+            <div class="house-address">{{address}}</div>
+            <div class="house-current-price">
+              <span class="{{trendCssClass}}"></span>
+              {{currentPrice}}
+            </div>
           </div>
         {{/each}}
     </script>
 
     <script type="text/javascript">
       $(function() {
+
         $.getJSON("http://localhost:3000/houses", function(houses){
-              console.log(houses);
-              if (houses) {
-                var templateSource = document.getElementById("housesTemplate").innerHTML;
-                var template = Handlebars.compile(templateSource);
-                var housesHtml = template(houses);
-                $('#houses').html(housesHtml);
+            console.log(houses);
+            if (houses) {
+              computeTrends(houses);
+              var templateSource = document.getElementById("housesTemplate").innerHTML;
+              var template = Handlebars.compile(templateSource);
+              var housesHtml = template(houses);
+              $('#houses').html(housesHtml);
+            }
+        });
+
+        function computeTrends(houses) {
+          houses.forEach(function(house) {
+            house.trendCssClass = 'text-primary glyphicon glyphicon-arrow-right';
+            if (house.priceHistory && house.priceHistory.length > 1) {
+              var previousPrice = priceStringToInt(house.priceHistory[house.priceHistory.length-2].price);
+              var currentPrice = priceStringToInt(house.currentPrice);
+              if (currentPrice < previousPrice) {
+                house.trendCssClass = 'text-success glyphicon glyphicon-arrow-down';
+              } else if (currentPrice > previousPrice) {
+                house.trendCssClass = 'text-danger glyphicon glyphicon-arrow-up';
               }
+            }
           });
+        }
+
+        function priceStringToInt(priceString) {
+          console.log(priceString);
+          return parseInt(priceString.replace(/\D/g,''));
+        }
+
       });
     </script>
 
