@@ -1,36 +1,45 @@
 const realtor = require('realtorca');
 const http = require('http');
 
-let opts = {
-  PriceMin: 350000,
-  PriceMax: 650000,
-  LongitudeMin: -119.87218099755859,
-  LongitudeMax: -119.1148110024414,
-  LatitudeMin: 49.8283700750105,
-  LatitudeMax: 49.938978568504204,
-  BuildingTypeId: 1,
-  OwnershipTypeGroupId: 1,
-};
+processPage(1);
 
-console.log( realtor.buildUrl(opts) );
-//https://www.realtor.ca/Residential/Map.aspx#CultureId=1&ApplicationId=1&RecordsPerPage=9&MaximumResults=9&PropertySearchTypeId=1&PriceMin=375000&PriceMax=650000&TransactionTypeId=2&StoreyRange=0-0&OwnershipTypeGroupId=1&BuildingTypeId=1&BedRange=0-0&BathRange=2-2&LongitudeMin=-119.87218099755859&LongitudeMax=-119.1148110024414&LatitudeMin=49.82837007501058&LatitudeMax=49.938978568504204&SortOrder=A&SortBy=1&viewState=g&Longitude=-119.493496&Latitude=49.883706&ZoomLevel=11&PropertyTypeGroupID=1
+function processPage(pageNumber){
+  console.log("Processing pageNumber: " + pageNumber.toString());
 
-realtor.post(opts)
-  .then(data => {
-      let responseObj = JSON.parse(JSON.stringify(data));
+  let opts = {
+    PriceMin: 350000,
+    PriceMax: 650000,
+    LongitudeMin: -119.87218099755859,
+    LongitudeMax: -119.1148110024414,
+    LatitudeMin: 49.8283700750105,
+    LatitudeMax: 49.938978568504204,
+    BuildingTypeId: 1,
+    OwnershipTypeGroupId: 1,
+    CurrentPage: pageNumber
+  };
 
-      //map obj to api domain model
-      let houseWatcherModel = mapResponseToModel(responseObj);
+  console.log( realtor.buildUrl(opts) );
 
-      houseWatcherModel.forEach(function(property){
-        console.log('Sending property: ' + property.externalId);
-        console.log(property);
-        sendRequest(property);
-      });
-  })
-  .catch(err => {
-    console.log(err);
-  });
+  realtor.post(opts)
+    .then(data => {
+        let responseObj = JSON.parse(JSON.stringify(data));
+
+        //map obj to api domain model
+        let properties = mapResponseToModel(responseObj);
+
+        properties.forEach(function(property){
+          console.log('Sending property: ' + property.externalId);
+          sendRequest(property);
+        });
+
+        if(properties.length > 0){
+          processPage(pageNumber+1);
+        }
+    })
+    .catch(err => {
+      console.log(err);
+    });
+}
 
 function sendRequest(property){
 
@@ -77,7 +86,7 @@ function mapResponseToModel(obj){
       address: obj.Results[i].Property.Address.AddressText,
       currentPrice: obj.Results[i].Property.Price,
       pictureUrl: obj.Results[i].Property.Photo[0].HighResPath,  //add if statement
-      listingUrl: obj.Results[i].RelativeDetailsURL,
+      listingUrl: 'https://www.realtor.ca/' + obj.Results[i].RelativeDetailsURL,
     });
   }
 
