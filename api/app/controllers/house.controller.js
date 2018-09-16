@@ -30,6 +30,7 @@ exports.upsert = (req, res) => {
         pictureUrl: req.body.pictureUrl,
         listingUrl: req.body.listingUrl,
         status: "new",
+        rank: req.body.rank ? req.body.rank : 0,
         priceHistory: [],
       });
     } else {
@@ -40,6 +41,7 @@ exports.upsert = (req, res) => {
       house.pictureUrl = req.body.pictureUrl;
       house.listingUrl = req.body.listingUrl;
       house.status = req.body.status ? req.body.status : house.status;
+      house.rank = req.body.rank ? req.body.rank : house.rank;
 
       // New price?
       if (house.priceHistory.length === 0 ||
@@ -90,6 +92,38 @@ exports.setStatus = (req, res) => {
     }).catch(err => {
         res.status(500).send({
             message: err.message || "Error setting house status."
+        });
+    });
+
+  });
+
+};
+
+exports.setRank = (req, res) => {
+
+  console.log("Setting rank of " + req.params.externalId);
+
+  House.findOne({ externalId: req.params.externalId }, function (err, house) {
+
+    if (err) {
+      return res.status(500).send({
+          message: "Server error: " + err.toString()
+      });
+    }
+
+    if (!house) {
+      return res.status(404).send({
+          message: "House " + externalId + " not found: " + err.toString()
+      });
+    }
+
+    house.rank = req.params.rank;
+    house.save()
+    .then(data => {
+        res.send(data);
+    }).catch(err => {
+        res.status(500).send({
+            message: err.message || "Error setting house rank."
         });
     });
 
