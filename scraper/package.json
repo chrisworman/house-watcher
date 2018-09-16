@@ -1,0 +1,25 @@
+{
+  "name": "scraper",
+  "version": "1.0.0",
+  "description": "A scraper for real estate listings",
+  "main": "index.js",
+  "scripts": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/chrisworman/house-watcher.git"
+  },
+  "keywords": [
+    "scraper"
+  ],
+  "author": "rbnjay",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/chrisworman/house-watcher/issues"
+  },
+  "homepage": "https://github.com/chrisworman/house-watcher#readme",
+  "dependencies": {
+    "realtorca": "^1.0.0"
+  }
+}
