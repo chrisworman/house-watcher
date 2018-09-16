@@ -1,7 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-var cors = require('cors');
-// const router = require('./app/routes/house.route.js');
+const cors = require('cors');
+const router = require('./app/routes/house.route.js');
 
 // create express app
 const app = express();
@@ -29,12 +29,7 @@ mongoose.connect(dbConfig.url, {
     process.exit();
 });
 
-// app.get('/', (req, res) => {
-//     res.json({"version": "1.0.0"});
-// });
-
-//router(app);
-require('./app/routes/house.route.js')(app);
+router(app);
 
 // listen for requests
 app.listen(3000, () => {
