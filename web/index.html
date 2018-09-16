@@ -13,7 +13,7 @@
       body {
         font-family : Arial, Helvetica, sans-serif;
       }
-      
+
       .house {
         float: left;
         margin: 15px;
@@ -28,12 +28,34 @@
 
       .house-image {
         display: block;
-        width: 200px;
-        height: 200px;
+        width: 240px;
+        height: 180px;
         background-repeat: no-repeat;
         background-size: contain;
         background-position: center center;
         margin-bottom: 15px;
+      }
+
+      .house-current-price {
+        font-size: 25px;
+      }
+
+      .status-liked {
+        color: #ab2d36;
+        font-size: 20px;
+        cursor: pointer;
+      }
+
+      .status-disliked {
+        color: #d3d9e0;
+        font-size: 20px;
+        cursor: pointer;
+      }
+
+      .status-new {
+        color: #fc6521;
+        font-size: 20px;
+        cursor: pointer;
       }
 
     </style>
@@ -41,10 +63,8 @@
   </head>
   <body>
 
-    <div id="houses">
-    </div>
+    <div id="houses"></div>
 
-    <!-- Including Bootstrap JS (with its jQuery dependency) so that dynamic components work -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.0.12/handlebars.min.js"></script>
@@ -58,50 +78,100 @@
               style="background-image: url('{{pictureUrl}}');"
               target="_blank"
             />
-            <div class="house-address">{{address}}</div>
+            <a
+              href="https://www.google.ca/maps/place/{{address}}/"
+              class="small house-address"
+              target="_blank"
+            >
+              <span class="glyphicon glyphicon-map-marker"></span>
+              {{address}}
+            </a>
+
+            <div class="pull-right">
+              {{#if isNew}}
+                <span class="status-new glyphicon glyphicon-certificate"></span>
+                &nbsp;
+              {{/if}}
+              {{#if isLiked}}
+                <span
+                  class="status-liked glyphicon glyphicon-heart"
+                  onclick="handleStatusClick('{{externalId}}', 'disliked');"
+                ></span>
+              {{else}}
+                <span
+                  class="status-disliked glyphicon glyphicon-heart"
+                  onclick="handleStatusClick('{{externalId}}', 'liked');"
+                ></span>
+              {{/if}}
+            </div>
+
             <div class="house-current-price">
               <span class="{{trendCssClass}}"></span>
               {{currentPrice}}
             </div>
+
           </div>
         {{/each}}
     </script>
 
     <script type="text/javascript">
-      $(function() {
 
+      function refreshHouses() {
         $.getJSON("http://localhost:3000/houses", function(houses){
             console.log(houses);
             if (houses) {
-              computeTrends(houses);
+              addTrendCssClasses(houses);
+              addStatusFlags(houses)
               var templateSource = document.getElementById("housesTemplate").innerHTML;
               var template = Handlebars.compile(templateSource);
               var housesHtml = template(houses);
               $('#houses').html(housesHtml);
             }
         });
+      }
 
-        function computeTrends(houses) {
-          houses.forEach(function(house) {
-            house.trendCssClass = 'text-primary glyphicon glyphicon-arrow-right';
-            if (house.priceHistory && house.priceHistory.length > 1) {
-              var previousPrice = priceStringToInt(house.priceHistory[house.priceHistory.length-2].price);
-              var currentPrice = priceStringToInt(house.currentPrice);
-              if (currentPrice < previousPrice) {
-                house.trendCssClass = 'text-success glyphicon glyphicon-arrow-down';
-              } else if (currentPrice > previousPrice) {
-                house.trendCssClass = 'text-danger glyphicon glyphicon-arrow-up';
-              }
+      function addTrendCssClasses(houses) {
+        houses.forEach(function(house) {
+          house.trendCssClass = 'text-primary glyphicon glyphicon-arrow-right';
+          if (house.priceHistory && house.priceHistory.length > 1) {
+            var previousPrice = priceStringToInt(house.priceHistory[house.priceHistory.length-2].price);
+            var currentPrice = priceStringToInt(house.currentPrice);
+            if (currentPrice < previousPrice) {
+              house.trendCssClass = 'text-success glyphicon glyphicon-arrow-down';
+            } else if (currentPrice > previousPrice) {
+              house.trendCssClass = 'text-danger glyphicon glyphicon-arrow-up';
             }
-          });
-        }
+          }
+        });
+      }
 
-        function priceStringToInt(priceString) {
-          console.log(priceString);
-          return parseInt(priceString.replace(/\D/g,''));
-        }
+      function addStatusFlags(houses) {
+        houses.forEach(function(house) {
+          house.isNew = house.status === 'new';
+          house.isLiked = house.status === 'liked';
+          house.isDisliked = house.status === 'disliked';
+        });
+      }
 
+      function priceStringToInt(priceString) {
+        console.log(priceString);
+        return parseInt(priceString.replace(/\D/g,''));
+      }
+
+      function handleStatusClick(externalId, newStatus) {
+        $.ajax({
+          url: "http://localhost:3000/houses/" + externalId + '/status/' + newStatus,
+          type: 'put',
+          success: function(){
+            refreshHouses();
+          }
+        });
+      }
+
+      $(function() {
+        refreshHouses();
       });
+
     </script>
 
   </body>

@@ -6,6 +6,7 @@ const HouseSchema = mongoose.Schema({
     currentPrice: String,
     pictureUrl: String,
     listingUrl: String,
+    status: String,
     priceHistory: [{
       priceDate: String,
       price: String,
