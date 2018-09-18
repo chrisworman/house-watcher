@@ -22,14 +22,9 @@ function processPage(pageNumber){
     CurrentPage: pageNumber
   };
 
-
-  console.log( realtor.buildUrl(opts) );
-
   realtor.post(opts)
     .then(data => {
         let responseObj = JSON.parse(JSON.stringify(data));
-
-        //map obj to api domain model
         let properties = mapResponseToModel(responseObj);
 
         properties.forEach(function(property){
@@ -61,19 +56,13 @@ function sendRequest(property){
   };
 
   var req = http.request(options, function(res) {
-    console.log('STATUS: ' + res.statusCode);
-    console.log('HEADERS: ' + JSON.stringify(res.headers));
     res.setEncoding('utf8');
-    res.on('data', function (chunk) {
-      console.log('BODY: ' + chunk);
-    });
   });
 
   req.on('error', function(e) {
     console.log('problem with request: ' + e.message);
   });
 
-  console.log(propertyJson);
   // write data to request body
   req.write(propertyJson);
   req.end();
@@ -90,14 +79,10 @@ function mapResponseToModel(obj){
       externalId: obj.Results[i].MlsNumber,
       address: obj.Results[i].Property.Address.AddressText,
       currentPrice: obj.Results[i].Property.Price,
-      pictureUrl: obj.Results[i].Property.Photo[0].HighResPath,  //add if statement
+      pictureUrl: obj.Results[i].Property.Photo.length > 0 ? obj.Results[i].Property.Photo[0].HighResPath : null,
       listingUrl: 'https://www.realtor.ca/' + obj.Results[i].RelativeDetailsURL,
     });
   }
 
-  //testing
-  console.log('Property harvest count: ' + properties.length);
-
   return properties;
-
 }
