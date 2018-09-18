@@ -20,6 +20,7 @@
   },
   "homepage": "https://github.com/chrisworman/house-watcher#readme",
   "dependencies": {
+    "cron": "^1.4.1",
     "realtorca": "^1.0.0"
   }
 }

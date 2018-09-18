@@ -1,7 +1,11 @@
 const realtor = require('realtorca');
 const http = require('http');
 
-processPage(1);
+module.exports = {
+    scrape: function(){
+        processPage(1);
+    }
+}
 
 function processPage(pageNumber){
   console.log("Processing pageNumber: " + pageNumber.toString());
@@ -17,6 +21,7 @@ function processPage(pageNumber){
     OwnershipTypeGroupId: 1,
     CurrentPage: pageNumber
   };
+
 
   console.log( realtor.buildUrl(opts) );
 
