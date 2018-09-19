@@ -12,6 +12,18 @@
 
       body {
         font-family : Arial, Helvetica, sans-serif;
+        margin-top: 60px;
+      }
+
+      nav {
+        height : 60px;
+        background-color: #fefefe;
+        box-shadow: 0 4px 2px -2px gray;
+        position: fixed;
+        top: 0;
+        width: 100%;
+        z-index : 1;
+        padding : 10px 30px;
       }
 
       .house {
@@ -89,6 +101,15 @@
   </head>
   <body>
 
+    <nav>
+      <div class="checkbox">
+        <label>
+          <input type="checkbox" id="likedFilter" />
+          <span class="glyphicon glyphicon-heart"></span>
+        </label>
+      </div>
+    </nav>
+
     <div id="houses"></div>
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
@@ -159,6 +180,7 @@
               addTrendCssClasses(houses);
               addStatusFlags(houses);
               addShortAddress(houses);
+              houses = applyFilters(houses);
               sortHouses(houses);
               var templateSource = document.getElementById("housesTemplate").innerHTML;
               var template = Handlebars.compile(templateSource);
@@ -250,7 +272,23 @@
         });
       }
 
+      function applyFilters(houses) {
+        var filtered = houses;
+        if ($('#likedFilter').prop('checked') == true) {
+          console.log('filtering isLiked');
+          filtered = houses.filter(function(house) {
+            return house.isLiked;
+          });
+        }
+        return filtered;
+      }
+
+      function bindFilterEventHandlers() {
+        $('#likedFilter').change(refreshHouses);
+      }
+
       $(function() {
+        bindFilterEventHandlers();
         refreshHouses();
       });
 
