@@ -23,15 +23,16 @@
         top: 0;
         width: 100%;
         z-index : 1;
-        padding : 10px 30px;
+        padding : 10px 0px;
       }
 
       .house {
-        float: left;
-        margin: 15px;
+        margin-top: 15px;
+        margin-bottom: 15px;
         padding: 15px;
         border: solid 1px #ddd;
         border-radius: 5px;
+        width: 100%;
       }
 
       .house:hover {
@@ -66,10 +67,10 @@
 
       .house-image {
         display: block;
-        width: 240px;
-        height: 180px;
+        /*width: 240px;*/
+        height: 250px;*/
         background-repeat: no-repeat;
-        background-size: contain;
+        background-size: cover;
         background-position: center center;
         margin-bottom: 15px;
       }
@@ -78,13 +79,13 @@
         font-size: 25px;
       }
 
-      .status-liked {
+      .thumb-on {
         color: #ab2d36;
         font-size: 20px;
         cursor: pointer;
       }
 
-      .status-disliked {
+      .thumb-off {
         color: #d3d9e0;
         font-size: 20px;
         cursor: pointer;
@@ -96,17 +97,47 @@
         cursor: pointer;
       }
 
+      #houseCount {
+        font-size : 25px;
+      }
+
     </style>
 
   </head>
   <body>
 
     <nav>
-      <div class="checkbox">
-        <label>
-          <input type="checkbox" id="likedFilter" />
-          <span class="glyphicon glyphicon-heart"></span>
-        </label>
+      <div class="container-fluid">
+        <div class="row">
+          <div class="col-xs-6 col-sm-4 col-md-2 col-lg-2>">
+            <div class="input-group">
+              <div class="input-group-addon">
+                <span class="glyphicon glyphicon-filter"></span>
+              </div>
+              <select id="statusFilterSelect" class="form-control">
+                <option value="all">All</option>
+                <option value="liked">Liked</option>
+                <option value="disliked">Disliked</option>
+                <option value="new">New</option>
+              </select>
+            </div>
+          </div>
+          <div class="col-xs-6 col-sm-4 col-md-2 col-lg-2>">
+            <div class="input-group">
+              <div class="input-group-addon">
+                <span class="glyphicon glyphicon-sort"></span>
+              </div>
+              <select id="sortSelect" class="form-control">
+                <option value="rank">Rank</option>
+                <option value="priceLowHigh">Price (Low to High)</option>
+                <option value="priceHighLow">Price (High to Low)</option>
+              </select>
+            </div>
+          </div>
+          <div class="hidden-xs col-sm-4 col-md-8 col-lg-8">
+            <span id="houseCount" class="badge pull-right">0</span>
+          </div>
+        </div>
       </div>
     </nav>
 
@@ -117,7 +148,10 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.0.12/handlebars.min.js"></script>
 
     <script id="housesTemplate" type="text/x-handlebars-template">
-        {{#each this}}
+        <div class="container-fluid">
+          <div class="row">
+            {{#each this}}
+              <div class="col-xs-12 col-sm-6 col-md-4 col-lg-3">
           <div class="house">
             <div class="house-rank">
               {{rank}}
@@ -131,7 +165,7 @@
             <a
               href="{{listingUrl}}"
               class="house-image"
-              style="background-image: url('{{pictureUrl}}');"
+              style="background-image: url('{{pictureUrl}}'), url('notfound.png');"
               target="_blank"
             ></a>
             <a
@@ -148,16 +182,33 @@
               {{#if isNew}}
                 <span class="status-new glyphicon glyphicon-certificate"></span>
                 &nbsp;
+                <span
+                  class="thumb-off glyphicon glyphicon-thumbs-up"
+                  onclick="handleStatusClick('{{externalId}}', 'liked');"
+                ></span>
+                <span
+                  class="thumb-off glyphicon glyphicon-thumbs-down"
+                  onclick="handleStatusClick('{{externalId}}', 'disliked');"
+                ></span>
               {{/if}}
               {{#if isLiked}}
                 <span
-                  class="status-liked glyphicon glyphicon-heart"
+                  class="thumb-on glyphicon glyphicon-thumbs-up"
+                  onclick="handleStatusClick('{{externalId}}', 'liked');"
+                ></span>
+                <span
+                  class="thumb-off glyphicon glyphicon-thumbs-down"
                   onclick="handleStatusClick('{{externalId}}', 'disliked');"
                 ></span>
-              {{else}}
+              {{/if}}
+              {{#if isDisliked}}
                 <span
-                  class="status-disliked glyphicon glyphicon-heart"
+                  class="thumb-off glyphicon glyphicon-thumbs-up"
                   onclick="handleStatusClick('{{externalId}}', 'liked');"
+                ></span>
+                <span
+                  class="thumb-on glyphicon glyphicon-thumbs-down"
+                  onclick="handleStatusClick('{{externalId}}', 'disliked');"
                 ></span>
               {{/if}}
             </div>
@@ -168,14 +219,16 @@
             </div>
 
           </div>
+        </div>
         {{/each}}
+      </div>
+      </div>
     </script>
 
     <script type="text/javascript">
 
       function refreshHouses() {
         $.getJSON("http://localhost:3000/houses", function(houses){
-            console.log(houses);
             if (houses) {
               addTrendCssClasses(houses);
               addStatusFlags(houses);
@@ -187,6 +240,7 @@
               var housesHtml = template(houses);
               $('#houses').html(housesHtml);
               bindEventHandlers();
+              $('#houseCount').text(houses.length);
             }
         });
       }
@@ -236,10 +290,17 @@
       }
 
       function sortHouses(houses) {
+        var sort = $('#sortSelect').val();
         houses.sort(function(h1, h2) {
-          var h1CompRank = h1.rank == 0 ? 99999 : h1.rank;
-          var h2CompRank = h2.rank == 0 ? 99999 : h2.rank;
-          return h1CompRank - h2CompRank;
+          if (sort === 'rank') {
+            var h1CompRank = h1.rank == 0 ? 99999 : h1.rank;
+            var h2CompRank = h2.rank == 0 ? 99999 : h2.rank;
+            return h1CompRank - h2CompRank;
+          } else if (sort === 'priceLowHigh'){
+            return priceStringToInt(h1.currentPrice) - priceStringToInt(h2.currentPrice);
+          } else if (sort === 'priceHighLow'){
+            return priceStringToInt(h2.currentPrice) - priceStringToInt(h1.currentPrice);
+          }
         });
       }
 
@@ -258,8 +319,10 @@
       }
 
       function priceStringToInt(priceString) {
-        console.log(priceString);
-        return parseInt(priceString.replace(/\D/g,''));
+        if (priceString) {
+          return parseInt(priceString.replace(/\D/g,''));
+        }
+        return 0;
       }
 
       function handleStatusClick(externalId, newStatus) {
@@ -274,17 +337,28 @@
 
       function applyFilters(houses) {
         var filtered = houses;
-        if ($('#likedFilter').prop('checked') == true) {
-          console.log('filtering isLiked');
+        var selectedFilter = $('#statusFilterSelect').val();
+        if (selectedFilter === 'liked') {
           filtered = houses.filter(function(house) {
             return house.isLiked;
+          });
+        }
+        if (selectedFilter === 'disliked') {
+          filtered = houses.filter(function(house) {
+            return house.isDisliked;
+          });
+        }
+        if (selectedFilter === 'new') {
+          filtered = houses.filter(function(house) {
+            return house.isNew;
           });
         }
         return filtered;
       }
 
       function bindFilterEventHandlers() {
-        $('#likedFilter').change(refreshHouses);
+        $('#statusFilterSelect').change(refreshHouses);
+        $('#sortSelect').change(refreshHouses);
       }
 
       $(function() {
