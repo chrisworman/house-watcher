@@ -94,7 +94,6 @@
       .status-new {
         color: #fc6521;
         font-size: 20px;
-        cursor: pointer;
       }
 
       #houseCount {
@@ -156,80 +155,81 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.0.12/handlebars.min.js"></script>
 
     <script id="housesTemplate" type="text/x-handlebars-template">
-        <div class="container-fluid">
-          <div class="row">
-            {{#each this}}
-              <div class="col-xs-12 col-sm-6 col-md-4 col-lg-3">
-          <div class="house">
-            <div class="house-rank">
-              {{rank}}
-            </div>
-            <input
-              type="text"
-              class="house-rank-input"
-              value="{{rank}}"
-              data-externalid="{{externalId}}"
-            />
-            <a
-              href="{{listingUrl}}"
-              class="house-image"
-              style="background-image: url('{{pictureUrl}}'), url('notfound.png');"
-              target="_blank"
-            ></a>
-            <a
-              href="https://www.google.ca/maps/place/{{address}}/"
-              class="small house-address"
-              title="{{address}}"
-              target="_blank"
-            >
-              <span class="glyphicon glyphicon-map-marker"></span>
-              {{shortAddress}}
-            </a>
+      <div class="container-fluid">
+        <div class="row">
+          {{#each this}}
+            <div class="col-xs-12 col-sm-6 col-md-4 col-lg-3">
+              <div class="house">
+                <div class="house-rank" title="Click to edit rank">
+                  {{rank}}
+                </div>
+                <input
+                  type="text"
+                  class="house-rank-input"
+                  value="{{rank}}"
+                  data-externalid="{{externalId}}"
+                />
+                <a
+                  href="{{listingUrl}}"
+                  title="Click to view details"
+                  class="house-image"
+                  style="background-image: url('{{pictureUrl}}'), url('notfound.png');"
+                  target="_blank"
+                ></a>
+                <a
+                  href="https://www.google.ca/maps/place/{{address}}/"
+                  class="small house-address"
+                  title="{{address}}: click to view map"
+                  target="_blank"
+                >
+                  <span class="glyphicon glyphicon-map-marker"></span>
+                  {{shortAddress}}
+                </a>
 
-            <div class="pull-right">
-              {{#if isNew}}
-                <span class="status-new glyphicon glyphicon-certificate"></span>
-                &nbsp;
-                <span
-                  class="thumb-off glyphicon glyphicon-thumbs-up"
-                  onclick="handleStatusClick('{{externalId}}', 'liked');"
-                ></span>
-                <span
-                  class="thumb-off glyphicon glyphicon-thumbs-down"
-                  onclick="handleStatusClick('{{externalId}}', 'disliked');"
-                ></span>
-              {{/if}}
-              {{#if isLiked}}
-                <span
-                  class="thumb-on glyphicon glyphicon-thumbs-up"
-                  onclick="handleStatusClick('{{externalId}}', 'liked');"
-                ></span>
-                <span
-                  class="thumb-off glyphicon glyphicon-thumbs-down"
-                  onclick="handleStatusClick('{{externalId}}', 'disliked');"
-                ></span>
-              {{/if}}
-              {{#if isDisliked}}
-                <span
-                  class="thumb-off glyphicon glyphicon-thumbs-up"
-                  onclick="handleStatusClick('{{externalId}}', 'liked');"
-                ></span>
-                <span
-                  class="thumb-on glyphicon glyphicon-thumbs-down"
-                  onclick="handleStatusClick('{{externalId}}', 'disliked');"
-                ></span>
-              {{/if}}
-            </div>
+                <div class="pull-right">
+                  {{#if isNew}}
+                    <span title="New house!" class="status-new glyphicon glyphicon-certificate"></span>
+                    &nbsp;
+                    <span
+                      class="thumb-off glyphicon glyphicon-thumbs-up"
+                      onclick="handleStatusClick('{{externalId}}', 'liked');"
+                    ></span>
+                    <span
+                      class="thumb-off glyphicon glyphicon-thumbs-down"
+                      onclick="handleStatusClick('{{externalId}}', 'disliked');"
+                    ></span>
+                  {{/if}}
+                  {{#if isLiked}}
+                    <span
+                      class="thumb-on glyphicon glyphicon-thumbs-up"
+                      onclick="handleStatusClick('{{externalId}}', 'liked');"
+                    ></span>
+                    <span
+                      class="thumb-off glyphicon glyphicon-thumbs-down"
+                      onclick="handleStatusClick('{{externalId}}', 'disliked');"
+                    ></span>
+                  {{/if}}
+                  {{#if isDisliked}}
+                    <span
+                      class="thumb-off glyphicon glyphicon-thumbs-up"
+                      onclick="handleStatusClick('{{externalId}}', 'liked');"
+                    ></span>
+                    <span
+                      class="thumb-on glyphicon glyphicon-thumbs-down"
+                      onclick="handleStatusClick('{{externalId}}', 'disliked');"
+                    ></span>
+                  {{/if}}
+                </div>
 
-            <div class="house-current-price">
-              <span class="{{trendCssClass}}"></span>
-              {{currentPrice}}
-            </div>
+                <div class="house-current-price">
+                  <span class="{{trendCssClass}}"></span>
+                  {{currentPrice}}
+                </div>
 
-          </div>
+              </div>
+            </div>
+          {{/each}}
         </div>
-        {{/each}}
-      </div>
       </div>
     </script>
 
