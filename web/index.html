@@ -23,15 +23,16 @@
         top: 0;
         width: 100%;
         z-index : 1;
-        padding : 10px 30px;
+        padding : 10px 0px;
       }
 
       .house {
-        float: left;
-        margin: 15px;
+        margin-top: 15px;
+        margin-bottom: 15px;
         padding: 15px;
         border: solid 1px #ddd;
         border-radius: 5px;
+        width: 100%;
       }
 
       .house:hover {
@@ -66,10 +67,10 @@
 
       .house-image {
         display: block;
-        width: 240px;
-        height: 180px;
+        /*width: 240px;*/
+        height: 250px;*/
         background-repeat: no-repeat;
-        background-size: contain;
+        background-size: cover;
         background-position: center center;
         margin-bottom: 15px;
       }
@@ -78,13 +79,13 @@
         font-size: 25px;
       }
 
-      .status-liked {
+      .thumb-on {
         color: #ab2d36;
         font-size: 20px;
         cursor: pointer;
       }
 
-      .status-disliked {
+      .thumb-off {
         color: #d3d9e0;
         font-size: 20px;
         cursor: pointer;
@@ -93,7 +94,10 @@
       .status-new {
         color: #fc6521;
         font-size: 20px;
-        cursor: pointer;
+      }
+
+      #houseCount {
+        font-size : 25px;
       }
 
     </style>
@@ -102,11 +106,45 @@
   <body>
 
     <nav>
-      <div class="checkbox">
-        <label>
-          <input type="checkbox" id="likedFilter" />
-          <span class="glyphicon glyphicon-heart"></span>
-        </label>
+      <div class="container-fluid">
+        <div class="row">
+          <div class="col-xs-6 col-sm-4 col-md-2 col-lg-2">
+            <div class="input-group" title="Filter houses">
+              <div class="input-group-addon">
+                <span class="glyphicon glyphicon-filter"></span>
+              </div>
+              <select id="statusFilterSelect" class="form-control">
+                <option value="all">All</option>
+                <option value="liked">Liked</option>
+                <option value="disliked">Disliked</option>
+                <option value="new">New</option>
+              </select>
+            </div>
+          </div>
+          <div class="col-xs-6 col-sm-4 col-md-2 col-lg-2">
+            <div class="input-group" title="Sort houses">
+              <div class="input-group-addon">
+                <span class="glyphicon glyphicon-sort"></span>
+              </div>
+              <select id="sortSelect" class="form-control">
+                <option value="rank">Rank</option>
+                <option value="priceLowHigh">Price (Low to High)</option>
+                <option value="priceHighLow">Price (High to Low)</option>
+              </select>
+            </div>
+          </div>
+          <div class="hidden-xs col-sm-2 col-md-2 col-lg-2">
+            <button id="refreshButton" title="Refresh houses" type="button" class="btn btn-default">
+              <span class="glyphicon glyphicon-refresh"></span>
+            </button>
+          </div>
+          <div class="hidden-xs col-sm-2 col-md-6 col-lg-6">
+            <div class="pull-right">
+              <span id="houseCount" class="badge ">0</span>
+            </div>
+
+          </div>
+        </div>
       </div>
     </nav>
 
@@ -117,65 +155,89 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.0.12/handlebars.min.js"></script>
 
     <script id="housesTemplate" type="text/x-handlebars-template">
-        {{#each this}}
-          <div class="house">
-            <div class="house-rank">
-              {{rank}}
-            </div>
-            <input
-              type="text"
-              class="house-rank-input"
-              value="{{rank}}"
-              data-externalid="{{externalId}}"
-            />
-            <a
-              href="{{listingUrl}}"
-              class="house-image"
-              style="background-image: url('{{pictureUrl}}');"
-              target="_blank"
-            ></a>
-            <a
-              href="https://www.google.ca/maps/place/{{address}}/"
-              class="small house-address"
-              title="{{address}}"
-              target="_blank"
-            >
-              <span class="glyphicon glyphicon-map-marker"></span>
-              {{shortAddress}}
-            </a>
+      <div class="container-fluid">
+        <div class="row">
+          {{#each this}}
+            <div class="col-xs-12 col-sm-6 col-md-4 col-lg-3">
+              <div class="house">
+                <div class="house-rank" title="Click to edit rank">
+                  {{rank}}
+                </div>
+                <input
+                  type="text"
+                  class="house-rank-input"
+                  value="{{rank}}"
+                  data-externalid="{{externalId}}"
+                />
+                <a
+                  href="{{listingUrl}}"
+                  title="Click to view details"
+                  class="house-image"
+                  style="background-image: url('{{pictureUrl}}'), url('notfound.png');"
+                  target="_blank"
+                ></a>
+                <a
+                  href="https://www.google.ca/maps/place/{{address}}/"
+                  class="small house-address"
+                  title="{{address}}: click to view map"
+                  target="_blank"
+                >
+                  <span class="glyphicon glyphicon-map-marker"></span>
+                  {{shortAddress}}
+                </a>
 
-            <div class="pull-right">
-              {{#if isNew}}
-                <span class="status-new glyphicon glyphicon-certificate"></span>
-                &nbsp;
-              {{/if}}
-              {{#if isLiked}}
-                <span
-                  class="status-liked glyphicon glyphicon-heart"
-                  onclick="handleStatusClick('{{externalId}}', 'disliked');"
-                ></span>
-              {{else}}
-                <span
-                  class="status-disliked glyphicon glyphicon-heart"
-                  onclick="handleStatusClick('{{externalId}}', 'liked');"
-                ></span>
-              {{/if}}
-            </div>
+                <div class="pull-right">
+                  {{#if isNew}}
+                    <span title="New house!" class="status-new glyphicon glyphicon-certificate"></span>
+                    &nbsp;
+                    <span
+                      class="thumb-off glyphicon glyphicon-thumbs-up"
+                      onclick="handleStatusClick('{{externalId}}', 'liked');"
+                    ></span>
+                    <span
+                      class="thumb-off glyphicon glyphicon-thumbs-down"
+                      onclick="handleStatusClick('{{externalId}}', 'disliked');"
+                    ></span>
+                  {{/if}}
+                  {{#if isLiked}}
+                    <span
+                      class="thumb-on glyphicon glyphicon-thumbs-up"
+                      onclick="handleStatusClick('{{externalId}}', 'liked');"
+                    ></span>
+                    <span
+                      class="thumb-off glyphicon glyphicon-thumbs-down"
+                      onclick="handleStatusClick('{{externalId}}', 'disliked');"
+                    ></span>
+                  {{/if}}
+                  {{#if isDisliked}}
+                    <span
+                      class="thumb-off glyphicon glyphicon-thumbs-up"
+                      onclick="handleStatusClick('{{externalId}}', 'liked');"
+                    ></span>
+                    <span
+                      class="thumb-on glyphicon glyphicon-thumbs-down"
+                      onclick="handleStatusClick('{{externalId}}', 'disliked');"
+                    ></span>
+                  {{/if}}
+                </div>
 
-            <div class="house-current-price">
-              <span class="{{trendCssClass}}"></span>
-              {{currentPrice}}
-            </div>
+                <div class="house-current-price">
+                  <span class="{{trendCssClass}}"></span>
+                  {{currentPrice}}
+                </div>
 
-          </div>
-        {{/each}}
+              </div>
+            </div>
+          {{/each}}
+        </div>
+      </div>
     </script>
 
     <script type="text/javascript">
 
       function refreshHouses() {
+        console.log('Refreshing houses...');
         $.getJSON("http://localhost:3000/houses", function(houses){
-            console.log(houses);
             if (houses) {
               addTrendCssClasses(houses);
               addStatusFlags(houses);
@@ -187,6 +249,7 @@
               var housesHtml = template(houses);
               $('#houses').html(housesHtml);
               bindEventHandlers();
+              $('#houseCount').text(houses.length);
             }
         });
       }
@@ -236,10 +299,17 @@
       }
 
       function sortHouses(houses) {
+        var sort = $('#sortSelect').val();
         houses.sort(function(h1, h2) {
-          var h1CompRank = h1.rank == 0 ? 99999 : h1.rank;
-          var h2CompRank = h2.rank == 0 ? 99999 : h2.rank;
-          return h1CompRank - h2CompRank;
+          if (sort === 'rank') {
+            var h1CompRank = h1.rank == 0 ? 99999 : h1.rank;
+            var h2CompRank = h2.rank == 0 ? 99999 : h2.rank;
+            return h1CompRank - h2CompRank;
+          } else if (sort === 'priceLowHigh'){
+            return priceStringToInt(h1.currentPrice) - priceStringToInt(h2.currentPrice);
+          } else if (sort === 'priceHighLow'){
+            return priceStringToInt(h2.currentPrice) - priceStringToInt(h1.currentPrice);
+          }
         });
       }
 
@@ -258,8 +328,10 @@
       }
 
       function priceStringToInt(priceString) {
-        console.log(priceString);
-        return parseInt(priceString.replace(/\D/g,''));
+        if (priceString) {
+          return parseInt(priceString.replace(/\D/g,''));
+        }
+        return 0;
       }
 
       function handleStatusClick(externalId, newStatus) {
@@ -274,21 +346,33 @@
 
       function applyFilters(houses) {
         var filtered = houses;
-        if ($('#likedFilter').prop('checked') == true) {
-          console.log('filtering isLiked');
+        var selectedFilter = $('#statusFilterSelect').val();
+        if (selectedFilter === 'liked') {
           filtered = houses.filter(function(house) {
             return house.isLiked;
+          });
+        }
+        if (selectedFilter === 'disliked') {
+          filtered = houses.filter(function(house) {
+            return house.isDisliked;
+          });
+        }
+        if (selectedFilter === 'new') {
+          filtered = houses.filter(function(house) {
+            return house.isNew;
           });
         }
         return filtered;
       }
 
-      function bindFilterEventHandlers() {
-        $('#likedFilter').change(refreshHouses);
+      function bindPermanentEventHandlers() {
+        $('#statusFilterSelect').change(refreshHouses);
+        $('#sortSelect').change(refreshHouses);
+        $('#refreshButton').click(refreshHouses);
       }
 
       $(function() {
-        bindFilterEventHandlers();
+        bindPermanentEventHandlers();
         refreshHouses();
       });
 
