@@ -68,6 +68,37 @@ exports.upsert = (req, res) => {
   });
 };
 
+exports.delete = (req, res) => {
+
+  House.findOne({'externalId':req.params.externalId})
+      .then(house => {
+          if(!house) {
+              return res.status(404).send({
+                  message: "House not found with id " + req.params.externalId
+              });
+          }
+          house.remove((err) => {
+            if (err) {
+              return res.status(500).send({
+                  message: "Error deleting house with id " + req.params.externalId
+              });
+            } else {
+              return res.status(200).send();
+            }
+          });
+      }).catch(err => {
+          if(err.kind === 'ObjectId') {
+              return res.status(404).send({
+                  message: "House not found with id " + req.params.externalId
+              });
+          }
+          return res.status(500).send({
+              message: "Error retrieving house with id " + req.params.externalId
+          });
+      });
+
+};
+
 exports.setStatus = (req, res) => {
 
   console.log("Setting status of " + req.params.externalId);
@@ -219,25 +250,4 @@ exports.findAll = (req, res) => {
             message: err.message || "Error retrieving houses."
         });
     });
-};
-
-exports.findOneByExternalId = (req, res) => {
-  House.findById(req.params.externalId)
-      .then(house => {
-          if(!house) {
-              return res.status(404).send({
-                  message: "House not found with id " + req.params.externalId
-              });
-          }
-          res.send(house);
-      }).catch(err => {
-          if(err.kind === 'ObjectId') {
-              return res.status(404).send({
-                  message: "House not found with id " + req.params.externalId
-              });
-          }
-          return res.status(500).send({
-              message: "Error retrieving house with id " + req.params.externalId
-          });
-      });
 };
