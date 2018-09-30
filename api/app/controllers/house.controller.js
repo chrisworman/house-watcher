@@ -1,6 +1,5 @@
 const House = require('../models/house.model.js');
 
-// Upsert a house
 exports.upsert = (req, res) => {
 
   console.log(req.body);
@@ -21,7 +20,7 @@ exports.upsert = (req, res) => {
     }
 
     if (!house) {
-      console.log('creating a new house');
+      console.log('Creating a new house');
       // Create a House
       house = new House({
         externalId: req.body.externalId,
@@ -32,9 +31,10 @@ exports.upsert = (req, res) => {
         status: "new",
         rank: req.body.rank ? req.body.rank : 0,
         priceHistory: [],
+        tags: []
       });
     } else {
-      console.log('found house');
+      console.log('Updating existing house');
       house.externalId = req.body.externalId;
       house.address = req.body.address;
       house.currentPrice = req.body.currentPrice;
@@ -42,6 +42,7 @@ exports.upsert = (req, res) => {
       house.listingUrl = req.body.listingUrl;
       house.status = req.body.status ? req.body.status : house.status;
       house.rank = req.body.rank ? req.body.rank : house.rank;
+      house.tags = req.body.tags ? req.body.tags : [];
 
       // New price?
       if (house.priceHistory.length === 0 ||
@@ -81,7 +82,7 @@ exports.setStatus = (req, res) => {
 
     if (!house) {
       return res.status(404).send({
-          message: "House " + externalId + " not found: " + err.toString()
+          message: "House " + req.params.externalId + " not found: " + err.toString()
       });
     }
 
@@ -113,7 +114,7 @@ exports.setRank = (req, res) => {
 
     if (!house) {
       return res.status(404).send({
-          message: "House " + externalId + " not found: " + err.toString()
+          message: "House " + req.params.externalId + " not found: " + err.toString()
       });
     }
 
@@ -131,7 +132,83 @@ exports.setRank = (req, res) => {
 
 };
 
-// Retrieve and return all houses from the database.
+exports.putTag = (req, res) => {
+
+  const tag = req.params.tag.toString().toLowerCase().trim();
+
+  console.log("Putting tag " + tag);
+
+  House.findOne({ externalId: req.params.externalId }, function (err, house) {
+
+    if (err) {
+      return res.status(500).send({
+          message: "Server error: " + err.toString()
+      });
+    }
+
+    if (!house) {
+      return res.status(404).send({
+          message: "House " + req.params.externalId + " not found: " + err.toString()
+      });
+    }
+
+    house.tags = house.tags || [];
+    if (house.tags.indexOf(tag) < 0) { // new tag
+      house.tags.push(tag);
+      house.tags.sort();
+    }
+
+    house.save()
+    .then(data => {
+        res.send(data);
+    }).catch(err => {
+        res.status(500).send({
+            message: err.message || "Error putting house tag."
+        });
+    });
+
+  });
+
+};
+
+exports.deleteTag = (req, res) => {
+
+  const tag = req.params.tag.toString().toLowerCase().trim();
+
+  console.log("Deleting tag " + tag);
+
+  House.findOne({ externalId: req.params.externalId }, function (err, house) {
+
+    if (err) {
+      return res.status(500).send({
+          message: "Server error: " + err.toString()
+      });
+    }
+
+    if (!house) {
+      return res.status(404).send({
+          message: "House " + req.params.externalId + " not found: " + err.toString()
+      });
+    }
+
+    house.tags = house.tags || [];
+    var tagIndex = house.tags.indexOf(tag);
+    if (tagIndex >= 0) { // tag exists
+      house.tags.splice(tagIndex, 1); // remove tag
+    }
+
+    house.save()
+    .then(data => {
+        res.send(data);
+    }).catch(err => {
+        res.status(500).send({
+            message: err.message || "Error putting house tag."
+        });
+    });
+
+  });
+};
+
 exports.findAll = (req, res) => {
   House.find()
     .then(houses => {
@@ -143,7 +220,6 @@ exports.findAll = (req, res) => {
     });
 };
 
-// Find a single house with a houseId
 exports.findOneByExternalId = (req, res) => {
   House.findById(req.params.externalId)
       .then(house => {
@@ -163,9 +239,4 @@ exports.findOneByExternalId = (req, res) => {
               message: "Error retrieving house with id " + req.params.externalId
           });
       });
-};
-
-// Delete a house with the specified houseId in the request
-exports.delete = (req, res) => {
-
 };
