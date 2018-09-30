@@ -102,7 +102,7 @@
       .tags {
         margin-top: 5px;
         margin-bottom: 5px;
-        padding: 5px;
+        padding: 4px;
         border: solid 1px #ddd;
         border-radius: 5px;
         width: 100%;
@@ -118,6 +118,7 @@
         border-radius: 5px;
         font-size: 11px;
         text-align: center;
+        margin-bottom : 4px;
       }
 
       .tag {
@@ -331,7 +332,7 @@
           var tag = prompt('Tag');
           if (tag) {
             $.ajax({
-              url: 'http://localhost:3000/houses/' + externalId.toString() + '/tags/' + tag.toString(),
+              url: 'http://localhost:3000/houses/' + externalId.toString() + '/tags/' + encodeURIComponent(tag.toString()),
               type: 'put',
               success: function(){
                 refreshHouses();
