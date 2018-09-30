@@ -449,8 +449,10 @@
             return 'bg-success';
           } else if (tag.startsWith('-')) {
             return 'bg-danger';
+          } else if (tag.startsWith('~')) {
+            return 'bg-warning';
           } else {
-            return '';
+            return 'bg-info';
           }
         });
       }
