@@ -13,17 +13,23 @@
       body {
         font-family : Arial, Helvetica, sans-serif;
         margin-top: 60px;
+        background-color: #8d9db6;
       }
 
       nav {
         height : 60px;
-        background-color: #fefefe;
-        box-shadow: 0 4px 2px -2px gray;
+        background-color: #667292;
+        box-shadow: 0 4px 2px -2px #555;
         position: fixed;
         top: 0;
         width: 100%;
         z-index : 1;
         padding : 10px 0px;
+      }
+
+      nav select {
+        -webkit-appearance: none;
+        -webkit-border-radius: 0px;
       }
 
       .house {
@@ -33,6 +39,7 @@
         border: solid 1px #ddd;
         border-radius: 5px;
         width: 100%;
+        background-color: #fff;
       }
 
       .house:hover {
@@ -40,8 +47,16 @@
       }
 
       .house-rank,
+      .house-rank-input,
+      nav .badge {
+        background-color: #C78283;
+        border: solid 1px #667292;
+        box-shadow: 2px 3px 10px 1px #333;
+        color: #fff;
+      }
+
+      .house-rank,
       .house-rank-input {
-        background-color: #337ab7;
         height: 35px;
         width: 35px;
         border-radius: 50%;
@@ -51,13 +66,10 @@
         text-align: center;
         line-height: 35px;
         font-size: 18px;
-        color: #fff;
         float: left;
         position: relative;
         top: -10px;
         left: -10px;
-        border: solid 1px #444;
-        box-shadow: 2px 3px 10px 1px #333;
         cursor: pointer;
       }
 
