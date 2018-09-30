@@ -134,9 +134,7 @@ exports.setRank = (req, res) => {
 
 exports.putTag = (req, res) => {
 
-  const tag = req.params.tag.toString().toLowerCase().trim();
-
-  console.log("Putting tag " + tag);
+  const queryTag = req.params.tag.toString().toLowerCase();
 
   House.findOne({ externalId: req.params.externalId }, function (err, house) {
 
@@ -153,10 +151,13 @@ exports.putTag = (req, res) => {
     }
 
     house.tags = house.tags || [];
-    if (house.tags.indexOf(tag) < 0) { // new tag
-      house.tags.push(tag);
-      house.tags.sort();
-    }
+    queryTag.split(',').map((t) => t.trim()).map((t) => {
+      if (t && t.length && house.tags.indexOf(t) < 0) { // new tag
+        house.tags.push(t);
+      }
+    });
+
+    house.tags.sort();
 
     house.save()
     .then(data => {
@@ -173,7 +174,7 @@ exports.putTag = (req, res) => {
 
 exports.deleteTag = (req, res) => {
 
-  const tag = req.params.tag.toString().toLowerCase().trim();
+  const tag = req.params.tag.toString().toLowerCase();
 
   console.log("Deleting tag " + tag);
 
