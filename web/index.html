@@ -44,7 +44,7 @@
       }
 
       .house:hover {
-        background-color: #eee;
+        background-color: #efefef;
       }
 
       .house-rank,
@@ -262,6 +262,14 @@
                       onclick="handleStatusClick('{{externalId}}', 'disliked');"
                     ></span>
                   {{/if}}
+                  <button
+                    title="Delete house"
+                    type="button"
+                    class="delete-house-button btn btn-xs btn-default"
+                    data-externalid="{{externalId}}"
+                  >
+                    <span class="text-danger glyphicon glyphicon-remove"></span>
+                  </button>
                 </div>
 
                 <div class="house-current-price">
@@ -357,7 +365,6 @@
         $('.tag').click(function() {
           var externalId = $(this).data('externalid');
           var tag = $(this).data('tag');
-          console.log(externalId);
           $.ajax({
             url: 'http://localhost:3000/houses/' + externalId.toString() + '/tags/' + tag.toString(),
             type: 'delete',
@@ -365,6 +372,19 @@
               refreshHouses();
             }
           });
+        });
+
+        $('.delete-house-button').click(function() {
+          if (confirm('Are you sure you want to delete this house?')) {
+            var externalId = $(this).data('externalid');
+            $.ajax({
+              url: 'http://localhost:3000/houses/' + externalId.toString(),
+              type: 'delete',
+              success: function(){
+                refreshHouses();
+              }
+            });
+          }
         });
 
       }

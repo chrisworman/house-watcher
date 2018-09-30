@@ -4,7 +4,7 @@ module.exports = (app) => {
     // house
     app.put('/houses', houses.upsert);
     app.get('/houses', houses.findAll);
-    app.get('/houses/:externalId', houses.findOneByExternalId);
+    app.delete('/houses/:externalId', houses.delete);
 
     // status
     app.put('/houses/:externalId/status/:status', houses.setStatus);
