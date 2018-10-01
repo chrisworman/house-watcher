@@ -88,7 +88,9 @@
       }
 
       .house-current-price {
+        display: inline-block;
         font-size: 25px;
+        cursor : pointer;
       }
 
       .thumb-on {
@@ -272,10 +274,17 @@
                   </button>
                 </div>
 
-                <div class="house-current-price">
+                <span
+                  class="house-current-price"
+                  data-externalid="{{externalId}}"
+                  title="Price history"
+                  data-container="body"
+                  data-toggle="popover"
+                  data-placement="bottom"
+                >
                   <span class="{{trendCssClass}}"></span>
                   {{currentPrice}}
-                </div>
+                </span>
 
                 <div class="tags">
                   <div
@@ -301,11 +310,22 @@
       </div>
     </script>
 
+    <script id="priceHistoryTemplate" type="text/x-handlebars-template">
+        {{#each priceHistory}}
+          <div>
+            {{price}} <span class="text-muted">{{priceDay priceDate}}</span>
+          </div>
+        {{/each}}
+    </script>
+
     <script type="text/javascript">
+
+      var lastHouses = [];
 
       function refreshHouses() {
         console.log('Refreshing houses...');
         $.getJSON("http://localhost:3000/houses", function(houses){
+          lastHouses = houses;
             if (houses) {
               addTrendCssClasses(houses);
               addStatusFlags(houses);
@@ -384,6 +404,22 @@
                 refreshHouses();
               }
             });
+          }
+        });
+
+        $('.house-current-price').popover({
+          trigger: 'hover',
+          html: true,
+          content: function() {
+            if (lastHouses && lastHouses.length) {
+              var externalId = $(this).data('externalid');
+              var house = lastHouses.filter(function(h) {
+                return h.externalId == externalId;
+              })[0];
+              var templateSource = document.getElementById("priceHistoryTemplate").innerHTML;
+              var template = Handlebars.compile(templateSource);
+              return template(house);
+            }
           }
         });
 
@@ -478,6 +514,7 @@
       }
 
       function setupHandlebars() {
+
         Handlebars.registerHelper('tagBGColorCSSClass', function(tag) {
           if (tag.startsWith('+')) {
             return 'bg-success';
@@ -489,6 +526,11 @@
             return 'bg-info';
           }
         });
+
+        Handlebars.registerHelper('priceDay', function(priceDate) {
+          return priceDate.split('T')[0];
+        });
+
       }
 
       $(function() {
