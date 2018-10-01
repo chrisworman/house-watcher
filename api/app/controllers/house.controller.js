@@ -42,7 +42,7 @@ exports.upsert = (req, res) => {
       house.listingUrl = req.body.listingUrl;
       house.status = req.body.status ? req.body.status : house.status;
       house.rank = req.body.rank ? req.body.rank : house.rank;
-      house.tags = req.body.tags ? req.body.tags : [];
+      house.tags = req.body.tags ? req.body.tags : house.tags;
 
       // New price?
       if (house.priceHistory.length === 0 ||
