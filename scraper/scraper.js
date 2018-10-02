@@ -4,7 +4,6 @@ const http = require('http');
 module.exports = {
     scrape: function(){
         console.log(new Date(Date.now()).toLocaleString() + ": scraping ...");
-
         processPage(1);
     }
 }
@@ -12,12 +11,12 @@ module.exports = {
 function processPage(pageNumber){
 
   let opts = {
-    PriceMin: 400000,
-    PriceMax: 620000,
-    LongitudeMin: -119.87218099755859,
-    LongitudeMax: -119.1148110024414,
+    PriceMin: 350000,
+    PriceMax: 650000,
+    LongitudeMin: -119.6241649763,
+    LongitudeMax: -119.301411984,
     LatitudeMin: 49.8283700750105,
-    LatitudeMax: 49.938978568504204,
+    LatitudeMax: 50.0980122512,
     BuildingTypeId: 1,
     OwnershipTypeGroupId: 1,
     CurrentPage: pageNumber
@@ -64,7 +63,7 @@ function sendRequest(property){
   });
 
   req.on('error', function(e) {
-    console.log('problem with request: ' + e.message);
+    console.log('Request error: ' + e.message);
   });
 
   // write data to request body
@@ -82,7 +81,7 @@ function mapResponseToModel(obj){
       address: obj.Results[i].Property.Address.AddressText,
       currentPrice: obj.Results[i].Property.Price,
       pictureUrl: obj.Results[i].Property.Photo.length > 0 ? obj.Results[i].Property.Photo[0].HighResPath : null,
-      listingUrl: 'https://www.realtor.ca/' + obj.Results[i].RelativeDetailsURL,
+      listingUrl: 'https://www.realtor.ca' + obj.Results[i].RelativeDetailsURL,
     });
   }
 
