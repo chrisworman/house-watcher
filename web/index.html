@@ -36,7 +36,6 @@
         margin-top: 15px;
         margin-bottom: 15px;
         padding: 15px;
-        /*border: solid 1px #ddd;*/
         border-radius: 3px;
         width: 100%;
         background-color: #fff;
@@ -52,7 +51,7 @@
       nav .badge {
         background-color: #A7B0CA;
         border: solid 1px #667292;
-        box-shadow: 2px 3px 10px 1px #333;
+        box-shadow: 1px 2px 5px 1px #666;
         color: #fff;
       }
 
@@ -520,7 +519,7 @@
 
         var minPriceFilter = $('#minPriceSelect').val();
         var maxPriceFilter = $('#maxPriceSelect').val();
-        
+
         var filtered = houses.filter(function(house) {
           var housePrice = priceStringToInt(house.currentPrice);
           return housePrice >= minPriceFilter && housePrice <= maxPriceFilter;
