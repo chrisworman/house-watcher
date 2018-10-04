@@ -163,6 +163,7 @@
                 <option value="liked">Liked</option>
                 <option value="disliked">Disliked</option>
                 <option value="new">New</option>
+                <option value="priceNotStable">Price Change</option>
               </select>
             </div>
           </div>
@@ -227,6 +228,7 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.0.12/handlebars.min.js"></script>
+    <script src="https://rawgit.com/moment/moment/2.2.1/min/moment.min.js"></script>
 
     <script id="housesTemplate" type="text/x-handlebars-template">
       <div class="container-fluid">
@@ -311,7 +313,15 @@
                   data-toggle="popover"
                   data-placement="bottom"
                 >
-                  <span class="{{trendCssClass}}"></span>
+                  {{#if priceUp}}
+                  <span class="text-danger glyphicon glyphicon-arrow-up"></span>
+                  {{/if}}
+                  {{#if priceStable}}
+                  <span class="text-primary glyphicon glyphicon-arrow-right"></span>
+                  {{/if}}
+                  {{#if priceDown}}
+                  <span class="text-success glyphicon glyphicon-arrow-down"></span>
+                  {{/if}}
                   {{currentPrice}}
                 </span>
 
@@ -356,7 +366,7 @@
         $.getJSON("http://localhost:3000/houses", function(houses){
           lastHouses = houses;
             if (houses) {
-              addTrendCssClasses(houses);
+              addPriceTrends(houses);
               addStatusFlags(houses);
               addShortAddress(houses);
               houses = applyFilters(houses);
@@ -454,19 +464,34 @@
 
       }
 
-      function addTrendCssClasses(houses) {
+      function addPriceTrends(houses) {
         houses.forEach(function(house) {
-          house.trendCssClass = 'text-primary glyphicon glyphicon-arrow-right';
-          if (house.priceHistory && house.priceHistory.length > 1) {
+          house.priceUp = false;
+          house.priceDown = false;
+          house.priceStable = false;
+          if (houseHasRecentPriceChange(house)) {
             var previousPrice = priceStringToInt(house.priceHistory[house.priceHistory.length-2].price);
             var currentPrice = priceStringToInt(house.currentPrice);
             if (currentPrice < previousPrice) {
-              house.trendCssClass = 'text-success glyphicon glyphicon-arrow-down';
+              house.priceDown = true;
             } else if (currentPrice > previousPrice) {
-              house.trendCssClass = 'text-danger glyphicon glyphicon-arrow-up';
+              house.priceUp = true;
             }
+          } else {
+            house.priceStable = true;
           }
         });
+      }
+
+      function houseHasRecentPriceChange(house) {
+        if (house.priceHistory && house.priceHistory.length > 1) {
+          var lastPriceChange = house.priceHistory[house.priceHistory.length-1];
+          var lastPriceChangeDate = moment(lastPriceChange.priceDate);
+          var daysSinceLastPriceChange = moment().diff(lastPriceChangeDate, 'days');
+          console.log(daysSinceLastPriceChange);
+          return daysSinceLastPriceChange <= 14;
+        }
+        return false;
       }
 
       function sortHouses(houses) {
@@ -539,6 +564,11 @@
         if (statusFilter === 'new') {
           filtered = filtered.filter(function(house) {
             return house.isNew;
+          });
+        }
+        if (statusFilter === 'priceNotStable') {
+          filtered = filtered.filter(function(house) {
+            return house.priceUp || house.priceDown;
           });
         }
 
