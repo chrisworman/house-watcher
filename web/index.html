@@ -7,13 +7,16 @@
     <title>House Watcher</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
-
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
     <style type="text/css">
 
       body {
         font-family : Arial, Helvetica, sans-serif;
         margin-top: 60px;
-        /*background-color: #E5FCF5;*/
+      }
+
+      .bg-success {
+
       }
 
       nav {
@@ -77,6 +80,13 @@
         display : none;
       }
 
+      .delete-house-button {
+        float: right;
+        right: -5px;
+        top: -5px;
+        position: relative;
+      }
+
       .house-image {
         display: block;
         height: 200px;
@@ -92,7 +102,13 @@
         cursor : pointer;
       }
 
-      .thumb-on {
+      .thumb-up {
+        color: #B3DEC1;
+        font-size: 20px;
+        cursor: pointer;
+      }
+
+      .thumb-down {
         color: #ab2d36;
         font-size: 20px;
         cursor: pointer;
@@ -138,6 +154,19 @@
       .tag {
         font-weight: bold;
         cursor: not-allowed;
+      }
+
+      .tag-positive {
+        background-color: #B3DEC1;
+      }
+      .tag-negative {
+        background-color: #f2dede;
+      }
+      .tag-meh {
+        background-color: #fcf8e3;
+      }
+      .tag-default {
+        background-color: #d9edf7;
       }
 
       .add-tag {
@@ -236,6 +265,16 @@
           {{#each this}}
             <div class="col-xs-12 col-sm-6 col-md-4 col-lg-3">
               <div class="house">
+
+                <button
+                  title="Delete house"
+                  type="button"
+                  class="delete-house-button btn btn-xs btn-default"
+                  data-externalid="{{externalId}}"
+                >
+                  <span class="text-danger glyphicon glyphicon-remove"></span>
+                </button>
+
                 <div class="house-rank" title="Click to edit rank">
                   {{rank}}
                 </div>
@@ -245,6 +284,7 @@
                   value="{{rank}}"
                   data-externalid="{{externalId}}"
                 />
+
                 <a
                   href="{{listingUrl}}"
                   title="Click to view details"
@@ -257,43 +297,47 @@
                   {{#if isNew}}
                     <span title="New house!" class="status-new glyphicon glyphicon-certificate"></span>
                     &nbsp;
-                    <span
-                      class="thumb-off glyphicon glyphicon-thumbs-up"
+                    <i
+                      class="thumb-off material-icons"
                       onclick="handleStatusClick('{{externalId}}', 'liked');"
-                    ></span>
-                    <span
-                      class="thumb-off glyphicon glyphicon-thumbs-down"
+                    >
+                      thumb_up_alt
+                    </i>
+                    <i
+                      class="thumb-off material-icons"
                       onclick="handleStatusClick('{{externalId}}', 'disliked');"
-                    ></span>
+                    >
+                      thumb_down_alt
+                    </i>
                   {{/if}}
                   {{#if isLiked}}
-                    <span
-                      class="thumb-on glyphicon glyphicon-thumbs-up"
+                    <i
+                      class="thumb-up material-icons"
                       onclick="handleStatusClick('{{externalId}}', 'liked');"
-                    ></span>
-                    <span
-                      class="thumb-off glyphicon glyphicon-thumbs-down"
+                    >
+                      thumb_up_alt
+                    </i>
+                    <i
+                      class="thumb-off material-icons"
                       onclick="handleStatusClick('{{externalId}}', 'disliked');"
-                    ></span>
+                    >
+                      thumb_down_alt
+                    </i>
                   {{/if}}
                   {{#if isDisliked}}
-                    <span
-                      class="thumb-off glyphicon glyphicon-thumbs-up"
+                    <i
+                      class="thumb-off material-icons"
                       onclick="handleStatusClick('{{externalId}}', 'liked');"
-                    ></span>
-                    <span
-                      class="thumb-on glyphicon glyphicon-thumbs-down"
+                    >
+                      thumb_up_alt
+                    </i>
+                    <i
+                      class="thumb-down material-icons"
                       onclick="handleStatusClick('{{externalId}}', 'disliked');"
-                    ></span>
+                    >
+                      thumb_down_alt
+                    </i>
                   {{/if}}
-                  <button
-                    title="Delete house"
-                    type="button"
-                    class="delete-house-button btn btn-xs btn-default"
-                    data-externalid="{{externalId}}"
-                  >
-                    <span class="text-danger glyphicon glyphicon-remove"></span>
-                  </button>
                 </div>
 
                 <div>
@@ -590,13 +634,13 @@
 
         Handlebars.registerHelper('tagBGColorCSSClass', function(tag) {
           if (tag.startsWith('+')) {
-            return 'bg-success';
+            return 'tag-positive';
           } else if (tag.startsWith('-')) {
-            return 'bg-danger';
+            return 'tag-negative';
           } else if (tag.startsWith('~')) {
-            return 'bg-warning';
+            return 'tag-meh';
           } else {
-            return 'bg-info';
+            return 'tag-default';
           }
         });
 
