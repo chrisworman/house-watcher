@@ -544,7 +544,7 @@
           var lastPriceChangeDate = moment(lastPriceChange.priceDate);
           var daysSinceLastPriceChange = moment().diff(lastPriceChangeDate, 'days');
           console.log(daysSinceLastPriceChange);
-          return daysSinceLastPriceChange <= 14;
+          return daysSinceLastPriceChange <= 5;
         }
         return false;
       }
