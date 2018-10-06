@@ -31,7 +31,8 @@ exports.upsert = (req, res) => {
         status: "new",
         rank: req.body.rank ? req.body.rank : 0,
         priceHistory: [],
-        tags: []
+        tags: [],
+        deleted: false
       });
     } else {
       console.log('Updating existing house');
@@ -70,33 +71,26 @@ exports.upsert = (req, res) => {
 
 exports.delete = (req, res) => {
 
-  House.findOne({'externalId':req.params.externalId})
-      .then(house => {
-          if(!house) {
-              return res.status(404).send({
-                  message: "House not found with id " + req.params.externalId
-              });
-          }
-          house.remove((err) => {
-            if (err) {
-              return res.status(500).send({
-                  message: "Error deleting house with id " + req.params.externalId
-              });
-            } else {
-              return res.status(200).send();
-            }
-          });
-      }).catch(err => {
-          if(err.kind === 'ObjectId') {
-              return res.status(404).send({
-                  message: "House not found with id " + req.params.externalId
-              });
-          }
-          return res.status(500).send({
-              message: "Error retrieving house with id " + req.params.externalId
-          });
-      });
+  House.findOne({'externalId':req.params.externalId}).then(house => {
 
+    if(!house) {
+      return res.status(404).send({
+          message: "House not found with id " + req.params.externalId
+      });
+    }
+
+    house.deleted = true;
+
+    house.save()
+    .then(data => {
+        res.send(data);
+    }).catch(err => {
+        res.status(500).send({
+            message: err.message || "Error deleting house."
+        });
+    });
+
+  });
 };
 
 exports.setStatus = (req, res) => {
@@ -244,7 +238,7 @@ exports.deleteTag = (req, res) => {
 exports.findAll = (req, res) => {
   House.find()
     .then(houses => {
-        res.send(houses);
+        res.send(houses.filter((h) => !h.deleted));
     }).catch(err => {
         res.status(500).send({
             message: err.message || "Error retrieving houses."

@@ -12,7 +12,8 @@ const HouseSchema = mongoose.Schema({
       priceDate: String,
       price: String,
     }],
-    tags: [String]
+    tags: [String],
+    deleted: Boolean
 }, {
     timestamps: true
 });
