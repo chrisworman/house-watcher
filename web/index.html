@@ -252,15 +252,6 @@
                   style="background-image: url('{{pictureUrl}}'), url('notfound.png');"
                   target="_blank"
                 ></a>
-                <a
-                  href="https://www.google.ca/maps/place/{{address}}/"
-                  class="small house-address"
-                  title="{{address}}: click to view map"
-                  target="_blank"
-                >
-                  <span class="glyphicon glyphicon-map-marker"></span>
-                  {{shortAddress}}
-                </a>
 
                 <div class="pull-right">
                   {{#if isNew}}
@@ -305,7 +296,19 @@
                   </button>
                 </div>
 
-                <span
+                <div>
+                  <a
+                    href="https://www.google.ca/maps/place/{{address}}/"
+                    class="small house-address"
+                    title="{{address}}: click to view map"
+                    target="_blank"
+                  >
+                    <span class="glyphicon glyphicon-map-marker"></span>
+                    {{shortAddress}}
+                  </a>
+                </div>
+
+                <div
                   class="house-current-price"
                   data-externalid="{{externalId}}"
                   title="Price history"
@@ -323,7 +326,7 @@
                   <span class="text-success glyphicon glyphicon-arrow-down"></span>
                   {{/if}}
                   {{currentPrice}}
-                </span>
+                </div>
 
                 <div class="tags">
                   <div
