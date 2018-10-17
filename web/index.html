@@ -188,12 +188,21 @@
     <nav>
       <div class="container-fluid">
         <div class="row">
+          <div class="col-xs-4 col-sm-4 hidden-md hidden-lg">
+            <button
+              type="button"
+              class="btn bnt-default hidden-md hidden-lg"
+              title="Open menu"
+            >
+                <span class="glyphicon glyphicon-menu-hamburger"></span>
+            </button>
+          </div>
           <div class="col-xs-6 col-sm-6 col-md-2 col-lg-2">
-            <div class="input-group" title="Filter houses">
+            <div class="input-group">
               <div class="input-group-addon">
                 <span class="glyphicon glyphicon-filter"></span>
               </div>
-              <select id="statusFilterSelect" class="form-control">
+              <select id="statusFilterSelect" class="form-control" title="Filter houses">
                 <option value="all">All</option>
                 <option value="liked">Liked</option>
                 <option value="disliked">Disliked</option>
@@ -544,7 +553,7 @@
           var lastPriceChangeDate = moment(lastPriceChange.priceDate);
           var daysSinceLastPriceChange = moment().diff(lastPriceChangeDate, 'days');
           console.log(daysSinceLastPriceChange);
-          return daysSinceLastPriceChange <= 5;
+          return daysSinceLastPriceChange <= 3;
         }
         return false;
       }
