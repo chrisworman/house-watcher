@@ -15,4 +15,7 @@ module.exports = (app) => {
     // tags
     app.put('/houses/:externalId/tags/:tag', houses.putTag);
     app.delete('/houses/:externalId/tags/:tag', houses.deleteTag);
+
+    // merge
+    app.put('/houses/merge/:keepExternalId/:deleteExternalId', houses.merge);
 }

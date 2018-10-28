@@ -15,6 +15,10 @@
         margin-top: 60px;
       }
 
+      #mergeModal .modal-body {
+        min-height: 500px;
+      }
+
       .bg-success {
 
       }
@@ -180,6 +184,10 @@
         background-color: #ddd;
       }
 
+      .btn-merge:hover, .btn-merge:focus, .btn-merge:active {
+        background-color: #B3DEC1;
+      }
+
     </style>
 
   </head>
@@ -262,6 +270,15 @@
           <div class="col-xs-12 col-sm-12 col-md-2 col-lg-2">
             <div class="pull-right">
               <br class="hidden-md hidden-lg" />
+              <button
+                id="mergeButton"
+                type="button"
+                class="btn btn-default"
+                title="Merge duplicate houses"
+              >
+                <span class="glyphicon glyphicon-transfer"></span>
+              </button>
+              &nbsp;
               <span id="houseCount" class="badge ">0</span>
             </div>
           </div>
@@ -272,6 +289,7 @@
     <div id="houses"></div>
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.0.12/handlebars.min.js"></script>
     <script src="https://rawgit.com/moment/moment/2.2.1/min/moment.min.js"></script>
@@ -302,13 +320,7 @@
                   data-externalid="{{externalId}}"
                 />
 
-                <a
-                  href="{{listingUrl}}"
-                  title="Click to view details"
-                  class="house-image"
-                  style="background-image: url('{{pictureUrl}}'), url('notfound.png');"
-                  target="_blank"
-                ></a>
+                {{> image}}
 
                 <div class="pull-right">
                   {{#if isNew}}
@@ -357,37 +369,8 @@
                   {{/if}}
                 </div>
 
-                <div>
-                  <a
-                    href="https://www.google.ca/maps/place/{{address}}/"
-                    class="small house-address"
-                    title="{{address}}: click to view map"
-                    target="_blank"
-                  >
-                    <span class="glyphicon glyphicon-map-marker"></span>
-                    {{shortAddress}}
-                  </a>
-                </div>
-
-                <div
-                  class="house-current-price"
-                  data-externalid="{{externalId}}"
-                  title="Price history"
-                  data-container="body"
-                  data-toggle="popover"
-                  data-placement="bottom"
-                >
-                  {{#if priceUp}}
-                  <span class="text-danger glyphicon glyphicon-arrow-up"></span>
-                  {{/if}}
-                  {{#if priceStable}}
-                  <span class="text-primary glyphicon glyphicon-arrow-right"></span>
-                  {{/if}}
-                  {{#if priceDown}}
-                  <span class="text-success glyphicon glyphicon-arrow-down"></span>
-                  {{/if}}
-                  {{currentPrice}}
-                </div>
+                {{> address}}
+                {{> price}}
 
                 <div class="tags">
                   <div
@@ -413,6 +396,53 @@
       </div>
     </script>
 
+    <script id="imageTemplate" type="text/x-handlebars-template">
+      <a
+        href="{{listingUrl}}"
+        title="Click to view details"
+        class="house-image"
+        style="background-image: url('{{pictureUrl}}'), url('notfound.png');"
+        target="_blank"
+      ></a>
+    </script>
+
+    <script id="addressTemplate" type="text/x-handlebars-template">
+      <div>
+        <a
+          href="https://www.google.ca/maps/place/{{address}}/"
+          class="small house-address"
+          title="{{address}}: click to view map"
+          target="_blank"
+        >
+          <span class="glyphicon glyphicon-map-marker"></span>
+          {{shortAddress}}
+        </a>
+      </div>
+    </script>
+
+    <script id="priceTemplate" type="text/x-handlebars-template">
+      <div
+        class="house-current-price"
+        data-externalid="{{externalId}}"
+        title="Current price"
+        data-container="body"
+        data-toggle="popover"
+        data-placement="bottom"
+      >
+        {{#if priceUp}}
+        <span class="text-danger glyphicon glyphicon-arrow-up"></span>
+        {{/if}}
+        {{#if priceStable}}
+        <span class="text-primary glyphicon glyphicon-arrow-right"></span>
+        {{/if}}
+        {{#if priceDown}}
+        <span class="text-success glyphicon glyphicon-arrow-down"></span>
+        {{/if}}
+
+        {{currentPrice}}
+      </div>
+    </script>
+
     <script id="priceHistoryTemplate" type="text/x-handlebars-template">
         {{#each priceHistory}}
           <div>
@@ -421,12 +451,41 @@
         {{/each}}
     </script>
 
+    <script id="mergeHousesTemplate" type="text/x-handlebars-template">
+      {{#each this}}
+      <div class="row" id="{{mergeId}}">
+        {{> mergeHouse house1}}
+        {{> mergeHouse house2}}
+      </div>
+      {{/each}}
+    </script>
+
+    <script id="mergeHouseTemplate" type="text/x-handlebars-template">
+      <div class="col-xs-6">
+        <div class="house">
+          {{> image}}
+          {{> address}}
+          {{> price}}
+          <button
+            type="button"
+            class="btn btn-default btn-block btn-merge"
+            data-externalid="{{externalId}}"
+          >
+            <span class="glyphicon glyphicon-ok"></span>
+            Keep
+          </button>
+        </div>
+      </div>
+    </script>
+
     <script type="text/javascript">
 
       var lastHouses = [];
+      var housesTemplate = null;
+      // TODO: price history template
+      var mergeHousesTemplate = null;
 
       function refreshHouses() {
-        console.log('Refreshing houses...');
         $.getJSON("http://localhost:3000/houses", function(houses){
           lastHouses = houses;
             if (houses) {
@@ -435,9 +494,7 @@
               addShortAddress(houses);
               houses = applyFilters(houses);
               sortHouses(houses);
-              var templateSource = document.getElementById("housesTemplate").innerHTML;
-              var template = Handlebars.compile(templateSource);
-              var housesHtml = template(houses);
+              var housesHtml = housesTemplate(houses);
               $('#houses').html(housesHtml);
               bindHouseEventHandlers();
               $('#houseCount').text(houses.length);
@@ -552,7 +609,6 @@
           var lastPriceChange = house.priceHistory[house.priceHistory.length-1];
           var lastPriceChangeDate = moment(lastPriceChange.priceDate);
           var daysSinceLastPriceChange = moment().diff(lastPriceChangeDate, 'days');
-          console.log(daysSinceLastPriceChange);
           return daysSinceLastPriceChange <= 3;
         }
         return false;
@@ -583,7 +639,7 @@
 
       function addShortAddress(houses) {
         houses.forEach(function(house) {
-          house.shortAddress = house.address.split(',')[0];
+          house.shortAddress = house.address.split(',')[0].split('|')[0].trim();
         });
       }
 
@@ -645,9 +701,25 @@
         $('#refreshButton').click(refreshHouses);
         $('#minPriceSelect').change(refreshHouses);
         $('#maxPriceSelect').change(refreshHouses);
+        $('#mergeButton').click(loadAndShowMergeModal);
+        $('#mergeModal').on('hidden.bs.modal', refreshHouses);
+      }
+
+      function compileTemplate(templateSourceId) {
+        return Handlebars.compile(
+          document.getElementById(templateSourceId).innerHTML
+        );
       }
 
       function setupHandlebars() {
+
+        housesTemplate = compileTemplate("housesTemplate");
+        mergeHousesTemplate = compileTemplate("mergeHousesTemplate");
+
+        Handlebars.registerPartial('image', compileTemplate("imageTemplate"));
+        Handlebars.registerPartial('address', compileTemplate("addressTemplate"));
+        Handlebars.registerPartial('price', compileTemplate("priceTemplate"));
+        Handlebars.registerPartial('mergeHouse', compileTemplate("mergeHouseTemplate"));
 
         Handlebars.registerHelper('tagBGColorCSSClass', function(tag) {
           if (tag.startsWith('+')) {
@@ -667,6 +739,72 @@
 
       }
 
+      function getSimilarHouses() {
+        var similarHouses = [];
+        for (var i=0; i<lastHouses.length-1; i++) {
+          for (var j=i+1; j<lastHouses.length; j++) {
+            var house1 = lastHouses[i];
+            var house2 = lastHouses[j];
+            if (house1.shortAddress && house2.shortAddress &&
+                house1.shortAddress.toLowerCase() == house2.shortAddress.toLowerCase()
+              ) {
+                house1.similarHouse = house2;
+                house2.similarHouse = house1;
+                similarHouses.push({
+                  house1: house1,
+                  house2: house2,
+                  mergeId: getMergeId(house1, house2),
+                });
+            }
+          }
+        }
+        return similarHouses;
+      }
+
+      function getMergeId(house1, house2) {
+        return "mergeRow" + ([house1.externalId, house2.externalId].sort()).join('M');
+      }
+
+      function getHouseByExternalId(externalId) {
+        var matches = lastHouses.filter(function(house) {
+          return house && house.externalId && house.externalId == externalId;
+        });
+        if (matches && matches.length) {
+          return matches[0];
+        }
+        return null;
+      }
+
+      function loadAndShowMergeModal() {
+        $('#mergeModal').modal('show');
+        var mergeHousesHtml = mergeHousesTemplate(getSimilarHouses());
+        $('#mergeModal .modal-body').html(mergeHousesHtml);
+        bindMergeButtonEventHandlers();
+      }
+
+      function bindMergeButtonEventHandlers() {
+        $('#mergeModal .btn-merge').click(function() {
+          var externalId = $(this).data('externalid');
+          var house = getHouseByExternalId(externalId);
+          if (!house) {
+            alert('Error finding house to keep.');
+          } else {
+            $.ajax({
+              url: 'http://localhost:3000/houses/merge/' + externalId.toString() + "/" + house.similarHouse.externalId,
+              type: 'put',
+              success: function(){
+                var mergeId = getMergeId(house, house.similarHouse);
+                var $mergeRow = $('#' + mergeId).hide(800);
+              },
+              error: function(xhr) {
+                console.log('Error merging houses:', xhr);
+                alert('Error merging houses.');
+              }
+            });
+          }
+        });
+      }
+
       $(function() {
         setupHandlebars();
         bindPermanentEventHandlers();
@@ -674,6 +812,22 @@
       });
 
     </script>
+
+    <div id="mergeModal" class="modal fade" tabindex="-1" role="dialog">
+      <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span class="glyphicon glyphicon-remove"></span>
+            </button>
+            <h4 class="modal-title">Merge Similar Houses</h4>
+          </div>
+          <div class="modal-body">
+            <p>TODO</p>
+          </div>
+        </div>
+      </div>
+    </div>
 
   </body>
 </html>

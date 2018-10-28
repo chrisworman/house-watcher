@@ -245,3 +245,54 @@ exports.findAll = (req, res) => {
         });
     });
 };
+
+exports.merge = (req, res) => {
+
+  const keepExternalId = req.params.keepExternalId;
+  const deleteExternalId = req.params.deleteExternalId;
+
+  House.findOne({'externalId':keepExternalId}).then(keepHouse => {
+    House.findOne({'externalId':deleteExternalId}).then(deleteHouse => {
+
+      if (!keepHouse || !deleteHouse) {
+        return res.status(404).send({
+            message: 'House not found for merge'
+        });
+      } else {
+
+        console.log(`Merging houses ${keepExternalId} ${deleteExternalId}`);
+
+        var bothTags = keepHouse.tags.concat(deleteHouse.tags).sort();
+        keepHouse.tags = bothTags.filter((elem, pos) => {
+          return bothTags.indexOf(elem) == pos; // remove duplicates
+        });
+        keepHouse.rank = deleteHouse.rank || keepHouse.rank;
+        keepHouse.status = deleteHouse.status || keepHouse.status;
+        keepHouse.priceHistory = deleteHouse.priceHistory || keepHouse.priceHistory;
+
+        keepHouse.save()
+        .then(data => {
+
+          deleteHouse.deleted = true;
+          deleteHouse.save()
+          .then(data => {
+            console.log(`Deleted house: ${deleteHouse}`);
+            res.send(data);
+          }).catch(err => {
+              res.status(500).send({
+                  message: err.message || "Error merging house."
+              });
+          });
+
+        }).catch(err => {
+            res.status(500).send({
+                message: err.message || "Error merging house."
+            });
+        });
+
+      }
+
+    });
+  });
+
+};
