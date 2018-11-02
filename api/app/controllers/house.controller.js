@@ -2,8 +2,6 @@ const House = require('../models/house.model.js');
 
 exports.upsert = (req, res) => {
 
-  console.log(req.body);
-
   // Validate
   if(!req.body) {
     return res.status(400).send({
@@ -35,7 +33,9 @@ exports.upsert = (req, res) => {
         deleted: false
       });
     } else {
+
       console.log('Updating existing house');
+
       house.externalId = req.body.externalId;
       house.address = req.body.address;
       house.currentPrice = req.body.currentPrice;
@@ -45,14 +45,7 @@ exports.upsert = (req, res) => {
       house.rank = req.body.rank ? req.body.rank : house.rank;
       house.tags = req.body.tags ? req.body.tags : house.tags;
 
-      // New price?
-      if (house.priceHistory.length === 0 ||
-          house.priceHistory[house.priceHistory.length-1].price !== house.currentPrice) {
-        house.priceHistory.push({
-          priceDate: new Date().toISOString(),
-          price: req.body.currentPrice,
-        });
-      }
+      addCurrentPriceToHistoryIfNecessary(house);
 
     }
 
@@ -270,6 +263,8 @@ exports.merge = (req, res) => {
         keepHouse.status = deleteHouse.status || keepHouse.status;
         keepHouse.priceHistory = deleteHouse.priceHistory || keepHouse.priceHistory;
 
+        addCurrentPriceToHistoryIfNecessary(keepHouse);
+
         keepHouse.save()
         .then(data => {
 
@@ -296,3 +291,13 @@ exports.merge = (req, res) => {
   });
 
 };
+
+function addCurrentPriceToHistoryIfNecessary(house) {
+  if (house.priceHistory.length === 0 ||
+      house.priceHistory[house.priceHistory.length-1].price !== house.currentPrice) {
+    house.priceHistory.push({
+      priceDate: new Date().toISOString(),
+      price: house.currentPrice,
+    });
+  }
+}
