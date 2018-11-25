@@ -195,16 +195,20 @@
 
     <nav>
       <div class="container-fluid">
-        <div class="row">
-          <div class="col-xs-4 col-sm-4 hidden-md hidden-lg">
+        <!-- menu patties -->
+        <div class="row hidden-md hidden-lg">
+          <div class="col-xs-12">
             <button
               type="button"
-              class="btn bnt-default hidden-md hidden-lg"
+              class="btn bnt-default"
               title="Open menu"
             >
-                <span class="glyphicon glyphicon-menu-hamburger"></span>
+              <span class="glyphicon glyphicon-menu-hamburger"></span>
             </button>
           </div>
+        </div>
+        <div class="row">
+          <!-- filter -->
           <div class="col-xs-6 col-sm-6 col-md-2 col-lg-2">
             <div class="input-group">
               <div class="input-group-addon">
@@ -219,6 +223,7 @@
               </select>
             </div>
           </div>
+          <!-- sort -->
           <div class="col-xs-6 col-sm-6 col-md-2 col-lg-2">
             <div class="input-group" title="Sort houses">
               <div class="input-group-addon">
@@ -231,6 +236,7 @@
               </select>
             </div>
           </div>
+          <!-- price -->
           <div class="col-xs-12 col-sm-12 col-md-4 col-lg-4">
             <br class="hidden-md hidden-lg" />
             <div class="input-group" >
@@ -262,11 +268,13 @@
               </select>
             </div>
           </div>
+          <!-- refresh -->
           <div class="hidden-xs hidden-sm col-md-2 col-lg-2">
             <button id="refreshButton" title="Refresh houses" type="button" class="btn btn-default">
               <span class="glyphicon glyphicon-refresh"></span>
             </button>
           </div>
+          <!-- merge / count -->
           <div class="col-xs-12 col-sm-12 col-md-2 col-lg-2">
             <div class="pull-right">
               <br class="hidden-md hidden-lg" />
@@ -278,7 +286,6 @@
               >
                 <span class="glyphicon glyphicon-transfer"></span>
               </button>
-              &nbsp;
               <span id="houseCount" class="badge ">0</span>
             </div>
           </div>
@@ -289,7 +296,6 @@
     <div id="houses"></div>
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
-
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.0.12/handlebars.min.js"></script>
     <script src="https://rawgit.com/moment/moment/2.2.1/min/moment.min.js"></script>
@@ -381,12 +387,14 @@
                     <span class="glyphicon glyphicon-plus"></span>
                   </div>
                   {{#each tags}}
-                    <div
-                      title="Click to delete this tag"
-                      data-externalid="{{../externalId}}"
-                      data-tag="{{this}}"
-                      class="tag {{tagBGColorCSSClass this}}"
-                    >{{this}}</div>
+                    {{#if this}}
+                      <div
+                        title="Click to delete this tag"
+                        data-externalid="{{../externalId}}"
+                        data-tag="{{this}}"
+                        class="tag {{tagBGColorCSSClass this}}"
+                      >{{this}}</div>
+                    {{/if}}
                   {{/each}}
                 </div>
               </div>
