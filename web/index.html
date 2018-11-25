@@ -554,7 +554,7 @@
           var externalId = $(this).data('externalid');
           var tag = $(this).data('tag');
           $.ajax({
-            url: 'http://localhost:3000/houses/' + externalId.toString() + '/tags/' + tag.toString(),
+            url: 'http://localhost:3000/houses/' + externalId.toString() + '/tags/' + encodeURIComponent(tag.toString()),
             type: 'delete',
             success: function(){
               refreshHouses();

@@ -213,11 +213,13 @@ exports.deleteTag = (req, res) => {
     house.tags = house.tags || [];
     var tagIndex = house.tags.indexOf(tag);
     if (tagIndex >= 0) { // tag exists
+      console.log('Tag found ... splicing');
       house.tags.splice(tagIndex, 1); // remove tag
     }
 
     house.save()
     .then(data => {
+        console.log('House tags saved');
         res.send(data);
     }).catch(err => {
         res.status(500).send({
