@@ -617,7 +617,7 @@
           var lastPriceChange = house.priceHistory[house.priceHistory.length-1];
           var lastPriceChangeDate = moment(lastPriceChange.priceDate);
           var daysSinceLastPriceChange = moment().diff(lastPriceChangeDate, 'days');
-          return daysSinceLastPriceChange <= 3;
+          return daysSinceLastPriceChange <= 1;
         }
         return false;
       }
