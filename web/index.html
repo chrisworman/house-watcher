@@ -83,6 +83,7 @@
         display : none;
       }
 
+      .restore-house-button,
       .delete-house-button {
         float: right;
         right: -5px;
@@ -220,6 +221,7 @@
                 <option value="disliked">Disliked</option>
                 <option value="new">New</option>
                 <option value="priceNotStable">Price Change</option>
+                <option value="deleted">Deleted</option>
               </select>
             </div>
           </div>
@@ -307,14 +309,27 @@
             <div class="col-xs-12 col-sm-6 col-md-4 col-lg-3" id="houseCol{{externalId}}">
               <div class="house">
 
-                <button
-                  title="Delete house"
-                  type="button"
-                  class="delete-house-button btn btn-xs btn-default"
-                  data-externalid="{{externalId}}"
-                >
-                  <span class="text-danger glyphicon glyphicon-remove"></span>
-                </button>
+                {{#if deleted}}
+                  <button
+                    title="Restore house"
+                    type="button"
+                    class="restore-house-button btn btn-xs btn-default"
+                    data-externalid="{{externalId}}"
+                  >
+                    <span class="text-success glyphicon glyphicon-share-alt"></span>
+                  </button>
+                {{else}}
+                  <button
+                    title="Delete house"
+                    type="button"
+                    class="delete-house-button btn btn-xs btn-default"
+                    data-externalid="{{externalId}}"
+                  >
+                    <span class="text-danger glyphicon glyphicon-remove"></span>
+                  </button>
+                {{/if}}
+
+
 
                 <div class="house-rank" title="Click to edit rank">
                   {{rank}}
@@ -494,7 +509,8 @@
       var mergeHousesTemplate = null;
 
       function refreshHouses() {
-        $.getJSON("http://localhost:3000/houses", function(houses){
+        var deleted = $('#statusFilterSelect').val() === "deleted";
+        $.getJSON("http://localhost:3000/houses?deleted=" + deleted.toString(), function(houses){
           lastHouses = houses;
             if (houses) {
               addPriceTrends(houses);
@@ -568,6 +584,19 @@
             $.ajax({
               url: 'http://localhost:3000/houses/' + externalId.toString(),
               type: 'delete',
+              success: function(){
+                $('#houseCol' + externalId).hide(500);
+              }
+            });
+          }
+        });
+
+        $('.restore-house-button').click(function() {
+          if (confirm('Are you sure you want to restore this house?')) {
+            var externalId = $(this).data('externalid');
+            $.ajax({
+              url: 'http://localhost:3000/houses/' + externalId.toString() + '/restore',
+              type: 'put',
               success: function(){
                 $('#houseCol' + externalId).hide(500);
               }

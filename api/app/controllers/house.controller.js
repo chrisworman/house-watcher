@@ -118,6 +118,39 @@ exports.setStatus = (req, res) => {
 
 };
 
+exports.restore = (req, res) => {
+
+  console.log("Restoring " + req.params.externalId);
+
+  House.findOne({ externalId: req.params.externalId }, function (err, house) {
+
+    if (err) {
+      return res.status(500).send({
+          message: "Server error: " + err.toString()
+      });
+    }
+
+    if (!house) {
+      return res.status(404).send({
+          message: "House " + req.params.externalId + " not found: " + err.toString()
+      });
+    }
+
+    house.deleted = false;
+    house.save()
+    .then(data => {
+        res.send(data);
+    }).catch(err => {
+        res.status(500).send({
+            message: err.message || "Error restoring house."
+        });
+    });
+
+  });
+
+};
+
+
 exports.setRank = (req, res) => {
 
   console.log("Setting rank of " + req.params.externalId);
@@ -231,9 +264,12 @@ exports.deleteTag = (req, res) => {
 };
 
 exports.findAll = (req, res) => {
+
+  console.log(req.query.deleted);
+
   House.find()
     .then(houses => {
-        res.send(houses.filter((h) => !h.deleted));
+        res.send(houses.filter((h) => h.deleted === (req.query.deleted === "true")));
     }).catch(err => {
         res.status(500).send({
             message: err.message || "Error retrieving houses."

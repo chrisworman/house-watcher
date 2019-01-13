@@ -5,6 +5,7 @@ module.exports = (app) => {
     app.put('/houses', houses.upsert);
     app.get('/houses', houses.findAll);
     app.delete('/houses/:externalId', houses.delete);
+    app.put('/houses/:externalId/restore', houses.restore);
 
     // status
     app.put('/houses/:externalId/status/:status', houses.setStatus);
