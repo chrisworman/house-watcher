@@ -2,7 +2,7 @@
 
 Node / Mongo HTTP rest API.  Install and start mongo:
 ```
-$ brew install mongodb
-$ brew services start mongodb
+$ brew install mongodb-community
+$ brew services start mongodb-community
 $ node index.js
 ```
